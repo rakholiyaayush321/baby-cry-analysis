@@ -1,0 +1,28 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+.env
+.idea/
+.vscode/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Audio and Video files (if not needed in repo)
+*.mp3
+*.mp4
+*.webm
+*.wav
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log

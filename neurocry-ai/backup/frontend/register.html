@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | NeuroCry AI</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .auth-container {
+            min-height: calc(100vh - 80px); /* Minus navbar height */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            background-color: var(--bg-light);
+        }
+        .auth-card {
+            background: white;
+            padding: 3rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 450px;
+        }
+        .auth-logo {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            margin-bottom: 2rem;
+        }
+        .auth-form-group {
+            margin-bottom: 1.5rem;
+        }
+        .auth-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+        .auth-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s;
+        }
+        .auth-input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        .auth-btn {
+            width: 100%;
+            padding: 0.875rem;
+            font-size: 1.1rem;
+            margin-top: 1rem;
+        }
+        .auth-links {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.95rem;
+        }
+        .auth-links a {
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .auth-links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <i class="fa-solid fa-baby"></i> NeuroCry AI
+            </a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="about.html">About</a>
+                <a href="features.html">Features</a>
+                <a href="login.html" class="active btn btn-primary" style="color: white; padding: 0.5rem 1.5rem;">Login</a>
+            </div>
+            <button class="mobile-menu-btn"><i class="fa-solid fa-bars"></i></button>
+        </div>
+    </nav>
+
+    <!-- Auth Section -->
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <i class="fa-solid fa-user-plus"></i> Create Account
+            </div>
+            
+            <div id="authErrorMsg" class="mb-3 text-center" style="display: none; color: var(--danger); background: rgba(239, 68, 68, 0.1); padding: 0.75rem; border-radius: 0.5rem; font-weight: 500;">
+                An error occurred.
+            </div>
+
+            <form id="registerForm">
+                <div class="auth-form-group">
+                    <label class="auth-label" for="email">Email Address</label>
+                    <input type="email" id="email" class="auth-input" placeholder="parent@example.com" required>
+                </div>
+                <div class="auth-form-group">
+                    <label class="auth-label" for="password">Create Password</label>
+                    <input type="password" id="password" class="auth-input" placeholder="••••••••" required minlength="6">
+                </div>
+                
+                <button type="submit" class="btn btn-primary auth-btn">Register Account <i class="fa-solid fa-arrow-right ml-2"></i></button>
+            </form>
+            
+            <div class="auth-links">
+                <p>Already have an account? <a href="login.html">Log In</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer style="margin-top: 0;">
+        <div class="container">
+            <div class="footer-bottom">
+                &copy; 2026 NeuroCry AI Analytics. Secure Platform.
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

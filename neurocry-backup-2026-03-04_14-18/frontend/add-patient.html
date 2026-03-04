@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Patient | NeuroCry AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Outfit', sans-serif; background-color: #f1f5f9; color: #1e293b; }
+        .medical-blue { color: #2563eb; }
+        .bg-medical { background-color: #2563eb; }
+        .nav-link { font-weight: 600; transition: all 0.3s; color: #64748b; }
+        .nav-link:hover { color: #2563eb; }
+        .nav-link.active { color: #2563eb; border-bottom: 2px solid #2563eb; }
+        .card-shadow { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); }
+        .step-badge { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; }
+        .method-card { transition: all 0.2s; cursor: pointer; }
+        .method-card:hover { transform: translateY(-2px); }
+        .method-card.selected { border-color: #2563eb; background: #eff6ff; }
+        .spinner { animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- NAVIGATION -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <nav class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <a href="patients.html" class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-blue-100 hover:text-medical transition-all mr-2">
+                    <i class="fas fa-arrow-left text-xs"></i>
+                </a>
+                <div class="w-10 h-10 bg-medical rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
+                    <i class="fas fa-microchip text-white"></i>
+                </div>
+                <span class="text-xl font-black tracking-tight text-slate-800">NeuroCry <span class="medical-blue">AI</span></span>
+            </div>
+            <div class="hidden md:flex items-center gap-8">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="about.html" class="nav-link">About</a>
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="patients.html" class="nav-link active">Patient Portal</a>
+                <a href="monitor.html" class="nav-link">Live Monitoring</a>
+            </div>
+            <button onclick="logout()" class="text-sm font-bold text-red-500 hover:text-red-600 transition-colors">Reset Session</button>
+        </nav>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-8 w-full flex-1">
+        
+        <!-- Page Header -->
+        <div class="mb-10">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="step-badge bg-blue-100 text-medical">1</div>
+                <h1 class="text-3xl font-bold text-slate-900">New Patient Onboarding</h1>
+            </div>
+            <p class="text-slate-500 ml-10">Register biometrics → Run AI Analysis → Save to system</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start pb-16">
+
+            <!-- ── LEFT: Patient Info ── -->
+            <div class="bg-white rounded-3xl p-8 card-shadow space-y-6">
+                <div class="flex items-center gap-3 pb-4 border-b border-slate-100">
+                    <div class="step-badge bg-blue-100 text-medical">1</div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">Patient Details</h2>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Clinical biometrics</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="md:col-span-2 space-y-1.5">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Patient Full Name *</label>
+                        <input type="text" id="pName" required placeholder="e.g. Rahul Kumar" 
+                            class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 font-bold text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Gender *</label>
+                        <select id="pGender" required class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 font-bold text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Age (Weeks) *</label>
+                        <input type="number" id="pAge" required min="1" max="104" placeholder="e.g. 8" 
+                            class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 font-bold text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Weight (kg) *</label>
+                        <input type="number" step="0.1" id="pWeight" required min="0.5" placeholder="e.g. 4.2" 
+                            class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 font-bold text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
+                    </div>
+                    <div class="md:col-span-2 space-y-1.5">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Parent / Guardian Name *</label>
+                        <input type="text" id="pGuardian" required placeholder="e.g. Mukeshbhai" 
+                            class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 font-bold text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
+                    </div>
+                    <div class="md:col-span-2 space-y-1.5">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Contact Number</label>
+                        <input type="tel" id="pContact" placeholder="+91 9876543210" 
+                            class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 font-bold text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
+                    </div>
+                    <div class="md:col-span-2 space-y-1.5">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Clinical Notes</label>
+                        <textarea id="pNotes" rows="3" placeholder="Any observed symptoms or medical history..." 
+                            class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 font-bold text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── RIGHT: Analysis + Submit ── -->
+            <div class="space-y-6">
+
+                <!-- Step 2: Choose Analysis Method -->
+                <div class="bg-white rounded-3xl p-8 card-shadow space-y-5">
+                    <div class="flex items-center gap-3 pb-4 border-b border-slate-100">
+                        <div class="step-badge bg-indigo-100 text-indigo-600">2</div>
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-800">AI Cry Analysis</h2>
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Choose input method</p>
+                        </div>
+                    </div>
+
+                    <!-- Upload Audio -->
+                    <div class="method-card group flex items-center gap-4 p-4 rounded-xl border-2 border-slate-100 bg-slate-50 hover:border-blue-200 hover:bg-blue-50" id="audioCard" onclick="document.getElementById('audioInp').click()">
+                        <div class="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center text-blue-500 group-hover:bg-medical group-hover:text-white transition-all">
+                            <i class="fas fa-microphone-alt"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-bold text-slate-800">Upload Audio</p>
+                            <p id="audioLabel" class="text-[10px] text-slate-500 uppercase font-black">WAV / MP3 / M4A</p>
+                        </div>
+                        <i class="fas fa-chevron-right text-slate-300 group-hover:text-blue-400"></i>
+                    </div>
+                    <input type="file" id="audioInp" hidden accept="audio/*" onchange="handleFileSelect(this.files[0], 'audio')">
+
+                    <!-- Upload Video -->
+                    <div class="method-card group flex items-center gap-4 p-4 rounded-xl border-2 border-slate-100 bg-slate-50 hover:border-purple-200 hover:bg-purple-50" id="videoCard" onclick="document.getElementById('videoInp').click()">
+                        <div class="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center text-purple-500 group-hover:bg-purple-600 group-hover:text-white transition-all">
+                            <i class="fas fa-video"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-bold text-slate-800">Upload Video</p>
+                            <p id="videoLabel" class="text-[10px] text-slate-500 uppercase font-black">MP4 / WEBM</p>
+                        </div>
+                        <i class="fas fa-chevron-right text-slate-300 group-hover:text-purple-400"></i>
+                    </div>
+                    <input type="file" id="videoInp" hidden accept="video/*" onchange="handleFileSelect(this.files[0], 'video')">
+
+                    <!-- Webcam -->
+                    <div class="method-card group flex items-center gap-4 p-4 rounded-xl border-2 border-slate-100 bg-slate-50 hover:border-emerald-200 hover:bg-emerald-50" id="webcamCard" onclick="startWebcam()">
+                        <div class="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center text-emerald-500 group-hover:bg-emerald-600 group-hover:text-white transition-all">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-bold text-slate-800">Start Live Scan</p>
+                            <p class="text-[10px] text-slate-500 uppercase font-black">3-second webcam capture</p>
+                        </div>
+                        <i id="recDot" class="fas fa-circle text-red-500 animate-pulse hidden"></i>
+                        <i class="fas fa-chevron-right text-slate-300 group-hover:text-emerald-400"></i>
+                    </div>
+
+                    <!-- Webcam preview -->
+                    <div id="camPreview" class="hidden rounded-2xl overflow-hidden bg-black aspect-video relative">
+                        <video id="vPreview" autoplay muted playsinline class="w-full h-full object-cover"></video>
+                        <div class="absolute bottom-3 left-3 right-3 flex justify-between items-center bg-black/50 backdrop-blur-md p-2.5 rounded-xl border border-white/10">
+                            <div class="flex items-center gap-2">
+                                <div class="w-2 h-2 rounded-full bg-red-500 animate-ping"></div>
+                                <span class="text-[10px] font-black text-white uppercase">Recording...</span>
+                            </div>
+                            <button type="button" onclick="stopWebcam()" class="px-3 py-1 bg-white text-rose-600 text-[10px] font-black uppercase rounded-lg">Stop</button>
+                        </div>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div id="analysisLoading" class="hidden flex items-center justify-center gap-3 py-6">
+                        <svg class="spinner w-6 h-6 text-medical" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        <span class="text-sm font-bold text-slate-500">AI processing audio signals...</span>
+                    </div>
+
+                    <!-- Step 3: Result Panel -->
+                    <div id="resultCard" class="hidden border-2 border-emerald-200 bg-emerald-50 rounded-2xl overflow-hidden">
+                        <div class="px-5 py-3 bg-emerald-100 flex justify-between items-center border-b border-emerald-200">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-check-circle text-emerald-600"></i>
+                                <span class="text-[10px] font-black text-emerald-700 uppercase tracking-widest">AI Detection Complete</span>
+                            </div>
+                            <button type="button" onclick="resetAnalysis()" class="text-[10px] font-black text-slate-400 hover:text-red-500 uppercase tracking-widest transition-colors">
+                                <i class="fas fa-redo mr-1"></i> Run Again
+                            </button>
+                        </div>
+                        <div class="p-5 space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Detected Cry Type</p>
+                                    <p id="rType" class="text-2xl font-black text-slate-900">--</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Confidence</p>
+                                    <span id="rConf" class="text-2xl font-black medical-blue">--%</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2 mb-1.5">
+                                    <div id="rDot" class="w-3 h-3 rounded-full bg-emerald-500"></div>
+                                    <span id="rRisk" class="text-xs font-black text-slate-600 uppercase">Low Risk</span>
+                                    <div class="flex-1 h-2 bg-white rounded-full overflow-hidden">
+                                        <div id="rBar" class="h-full bg-emerald-500 transition-all duration-700 rounded-full" style="width:0%"></div>
+                                    </div>
+                                    <span id="rStab" class="text-[10px] font-black text-slate-400">--% stable</span>
+                                </div>
+                            </div>
+                            <p id="rRec" class="text-xs text-slate-600 font-medium leading-relaxed bg-white rounded-xl p-3 border border-slate-100"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Final Submit -->
+                <button type="button" id="submitBtn" onclick="submitOnboarding()" disabled
+                    class="w-full py-5 rounded-2xl bg-slate-100 text-slate-400 font-black text-sm uppercase tracking-widest cursor-not-allowed transition-all">
+                    <i class="fas fa-lock mr-2"></i> Complete Analysis First
+                </button>
+
+                <p class="text-center text-[10px] text-slate-400 font-medium">
+                    <i class="fas fa-shield-alt mr-1 text-emerald-500"></i> Patient data is encrypted and stored securely
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-slate-200 pt-10 pb-6 px-6">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-6 h-6 bg-medical rounded-md flex items-center justify-center shadow-lg shadow-blue-500/30">
+                    <i class="fas fa-microchip text-white text-[8px]"></i>
+                </div>
+                <span class="text-sm font-black tracking-tight text-slate-800">NeuroCry <span class="medical-blue">AI</span></span>
+            </div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">© 2026 NeuroCry AI · Secure Clinical Environment</p>
+        </div>
+    </footer>
+
+    <script src="auth.js"></script>
+    <script>
+        // ── State ──────────────────────────────────────────────────────────────
+        let analysisResult = null;  // Stores the full AI result to be sent on submit
+        let stream = null;
+        let recorder = null;
+        let chunks = [];
+
+        // ── Step 2: File picked → immediate analysis ────────────────────────────
+        async function handleFileSelect(file, type) {
+            if (!file) return;
+            // Mark the chosen card
+            ['audioCard','videoCard','webcamCard'].forEach(id => document.getElementById(id).classList.remove('selected'));
+            document.getElementById(type + 'Card').classList.add('selected');
+            document.getElementById(type + 'Label') && (document.getElementById(type + 'Label').innerText = file.name.length > 22 ? file.name.slice(0,22)+'…' : file.name);
+
+            await runAnalysis(file, type);
+        }
+
+        async function runAnalysis(file, type) {
+            document.getElementById('resultCard').classList.add('hidden');
+            document.getElementById('analysisLoading').classList.remove('hidden');
+            setSubmitLocked(true);
+
+            const fd = new FormData();
+            fd.append('file', file);
+
+            try {
+                const res = await fetch(`${API}/api/analyze-${type}`, {
+                    method: 'POST',
+                    headers: getToken() ? { 'Authorization': `Bearer ${getToken()}` } : {},
+                    body: fd
+                });
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    throw new Error(err.detail || 'Analysis failed');
+                }
+                const data = await res.json();
+                showResult(data);
+            } catch (err) {
+                console.error('Analysis error:', err);
+                showToast('Analysis failed: ' + err.message, 'error');
+            } finally {
+                document.getElementById('analysisLoading').classList.add('hidden');
+            }
+        }
+
+        // ── Step 3: Display result ──────────────────────────────────────────────
+        function showResult(data) {
+            analysisResult = data;
+
+            document.getElementById('rType').innerText  = data.cry_type || '--';
+            document.getElementById('rConf').innerText  = (data.confidence || 0) + '%';
+            document.getElementById('rRisk').innerText  = (data.risk || data.risk_level || 'Low') + ' Risk';
+            document.getElementById('rRec').innerText   = data.recommendation || '';
+
+            const risk = data.risk || data.risk_level || 'Low';
+            const dot  = document.getElementById('rDot');
+            const bar  = document.getElementById('rBar');
+            const stab = document.getElementById('rStab');
+            const card = document.getElementById('resultCard');
+
+            if (risk === 'High') {
+                dot.className  = 'w-3 h-3 rounded-full bg-rose-500';
+                bar.className  = 'h-full bg-rose-500 transition-all duration-700 rounded-full';
+                bar.style.width = '88%'; stab.innerText = '12% stable';
+                card.className  = card.className.replace('border-emerald-200 bg-emerald-50','border-rose-200 bg-rose-50');
+            } else if (risk === 'Medium') {
+                dot.className  = 'w-3 h-3 rounded-full bg-amber-500';
+                bar.className  = 'h-full bg-amber-500 transition-all duration-700 rounded-full';
+                bar.style.width = '55%'; stab.innerText = '45% stable';
+                card.className  = card.className.replace('border-emerald-200 bg-emerald-50','border-amber-200 bg-amber-50');
+            } else {
+                dot.className  = 'w-3 h-3 rounded-full bg-emerald-500';
+                bar.className  = 'h-full bg-emerald-500 transition-all duration-700 rounded-full';
+                bar.style.width = '25%'; stab.innerText = '75% stable';
+            }
+
+            document.getElementById('resultCard').classList.remove('hidden');
+            setSubmitLocked(false);
+        }
+
+        function setSubmitLocked(locked) {
+            const btn = document.getElementById('submitBtn');
+            if (locked) {
+                btn.disabled = true;
+                btn.className = 'w-full py-5 rounded-2xl bg-slate-100 text-slate-400 font-black text-sm uppercase tracking-widest cursor-not-allowed transition-all';
+                btn.innerHTML = '<i class="fas fa-lock mr-2"></i> Complete Analysis First';
+            } else {
+                btn.disabled = false;
+                btn.className = 'w-full py-5 rounded-2xl bg-medical text-white font-black text-sm uppercase tracking-widest shadow-xl shadow-blue-500/20 hover:scale-[1.01] transition-all';
+                btn.innerHTML = '<i class="fas fa-user-check mr-2"></i> Finalize Onboarding — Save Patient';
+            }
+        }
+
+        function resetAnalysis() {
+            analysisResult = null;
+            ['audioCard','videoCard','webcamCard'].forEach(id => document.getElementById(id).classList.remove('selected'));
+            document.getElementById('resultCard').classList.add('hidden');
+            // Reset card colour
+            const card = document.getElementById('resultCard');
+            card.className = card.className
+                .replace('border-rose-200 bg-rose-50','border-emerald-200 bg-emerald-50')
+                .replace('border-amber-200 bg-amber-50','border-emerald-200 bg-emerald-50');
+            setSubmitLocked(true);
+        }
+
+        // ── Webcam recording ───────────────────────────────────────────────────
+        async function startWebcam() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                document.getElementById('vPreview').srcObject = stream;
+                document.getElementById('camPreview').classList.remove('hidden');
+                document.getElementById('recDot').classList.remove('hidden');
+                document.getElementById('webcamCard').classList.add('selected');
+                startRecording();
+            } catch (err) {
+                showToast('Camera access denied. Allow mic & camera in browser settings.', 'error');
+            }
+        }
+
+        function startRecording() {
+            chunks = [];
+            const mimeTypes = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','video/webm'];
+            const mimeType  = mimeTypes.find(t => MediaRecorder.isTypeSupported(t)) || '';
+            recorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
+            recorder.ondataavailable = e => chunks.push(e.data);
+            recorder.onstop = () => {
+                const blob = new Blob(chunks, { type: mimeType || 'audio/webm' });
+                const file = new File([blob], 'webcam_capture.webm', { type: mimeType || 'audio/webm' });
+                stopWebcam();
+                runAnalysis(file, 'webcam');
+            };
+            recorder.start();
+            setTimeout(() => { if (recorder && recorder.state === 'recording') recorder.stop(); }, 3000);
+        }
+
+        function stopWebcam() {
+            if (stream) stream.getTracks().forEach(t => t.stop());
+            stream = null;
+            document.getElementById('camPreview').classList.add('hidden');
+            document.getElementById('recDot').classList.add('hidden');
+        }
+
+        // ── Step 4: Validate form ──────────────────────────────────────────────
+        function validateForm() {
+            const required = [
+                { id: 'pName',    label: 'Patient Name' },
+                { id: 'pGender',  label: 'Gender' },
+                { id: 'pAge',     label: 'Age (weeks)' },
+                { id: 'pWeight',  label: 'Weight (kg)' },
+                { id: 'pGuardian',label: 'Guardian Name' },
+            ];
+            for (const f of required) {
+                const el = document.getElementById(f.id);
+                if (!el.value.trim()) {
+                    showToast(`Please fill in: ${f.label}`, 'warning');
+                    el.focus();
+                    el.classList.add('border-red-400', 'ring-2', 'ring-red-200');
+                    setTimeout(() => el.classList.remove('border-red-400','ring-2','ring-red-200'), 2500);
+                    return false;
+                }
+            }
+            if (!analysisResult) {
+                showToast('Please run the AI analysis first (upload audio/video or use webcam).', 'warning');
+                return false;
+            }
+            return true;
+        }
+
+        // ── Step 7: Final onboarding — JSON POST ───────────────────────────────
+        async function submitOnboarding() {
+            if (!validateForm()) return;
+
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = `<svg class="spinner w-5 h-5 inline mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Saving Patient...`;
+
+            const risk = analysisResult.risk || analysisResult.risk_level || 'Low';
+            const stabilityMap = { Low: 75, Medium: 45, High: 12 };
+
+            const payload = {
+                // Patient biometrics
+                name:           document.getElementById('pName').value.trim(),
+                gender:         document.getElementById('pGender').value,
+                age_weeks:      parseInt(document.getElementById('pAge').value),
+                weight:         parseFloat(document.getElementById('pWeight').value),
+                guardian_name:  document.getElementById('pGuardian').value.trim(),
+                contact_number: document.getElementById('pContact').value.trim() || null,
+                medical_notes:  document.getElementById('pNotes').value.trim() || null,
+
+                // Pre-computed AI analysis (no re-upload!)
+                cry_type:       analysisResult.cry_type,
+                confidence:     parseFloat(analysisResult.confidence),
+                risk_level:     risk,
+                stability_score: stabilityMap[risk] || 75,
+                status:         risk === 'High' ? 'Critical' : risk === 'Medium' ? 'Warning' : 'Normal',
+                recommendation: analysisResult.recommendation || `Detected: ${analysisResult.cry_type}`,
+                detected_problem: analysisResult.recommendation || null,
+                metrics:        analysisResult.metrics || { distress_score: 0, infection_risk: 0, respiratory_risk: 0 }
+            };
+
+            try {
+                const res = await apiFetch('/api/patient/final-onboarding', {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    showToast('Patient registered successfully!', 'success');
+                    setTimeout(() => {
+                        window.location.href = `profile.html?id=${data.patient_id}`;
+                    }, 800);
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    showToast(err.detail || 'Registration failed. Please try again.', 'error');
+                    setSubmitLocked(false);
+                }
+            } catch (err) {
+                                showToast('Network error. Is the backend server running on port 8001?', 'error');
+                setSubmitLocked(false);
+            }
+        }
+    </script>
+</body>
+</html>

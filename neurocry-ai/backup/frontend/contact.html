@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact | NeuroCry AI Platform</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <i class="fa-solid fa-baby"></i> NeuroCry AI
+            </a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="about.html">About</a>
+                <a href="features.html">Features</a>
+                <a href="monitor.html">Monitoring</a>
+                <a href="dashboard.html">Dashboard</a>
+                <a href="contact.html" class="active">Contact</a>
+            </div>
+            <button class="mobile-menu-btn"><i class="fa-solid fa-bars"></i></button>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <section class="section" style="background-color: var(--card-white);">
+        <div class="container">
+            <h1 class="section-title text-center">Contact Engineering & Support</h1>
+            <p class="section-subtitle">Reach out for project details, deployment inquiries, or clinical partnerships.</p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 4rem; margin-top: 4rem;">
+                
+                <!-- Info block -->
+                <div>
+                    <h3 style="margin-bottom: 1.5rem;"><i class="fa-solid fa-building"></i> Company Information</h3>
+                    <p class="text-muted" style="margin-bottom: 1.5rem;">
+                        <strong>NeuroCry AI Corp.</strong><br>
+                        Enterprise SaaS for Pediatric Care.<br>
+                        This is a demonstration project built to showcase cutting-edge predictive software integrated with standard REST API and WebRTC functionalities.
+                    </p>
+                    <ul style="display: flex; flex-direction: column; gap: 1rem;">
+                        <li><i class="fa-solid fa-envelope" style="width: 25px; color: var(--primary-blue);"></i> <a href="mailto:contact@neurocry.ai">contact@neurocry.ai</a></li>
+                        <li><i class="fa-solid fa-phone" style="width: 25px; color: var(--primary-blue);"></i> +1 (555) 012-3492</li>
+                        <li><i class="fa-solid fa-map-location-dot" style="width: 25px; color: var(--primary-blue);"></i> Research Triangle Park, NC</li>
+                    </ul>
+                </div>
+
+                <!-- Form block -->
+                <div class="card">
+                    <h3 style="margin-bottom: 1.5rem;">Send a Message</h3>
+                    <form style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-gray); font-weight: 500;">Full Name</label>
+                            <input type="text" class="btn-outline" style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; text-align: left;" placeholder="Dr. Jane Smith" required>
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-gray); font-weight: 500;">Email Address</label>
+                            <input type="email" class="btn-outline" style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; text-align: left;" placeholder="jane@hospital.org" required>
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-gray); font-weight: 500;">Message</label>
+                            <textarea class="btn-outline" style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; min-height: 120px; text-align: left; resize: vertical;" placeholder="How can we help..." required></textarea>
+                        </div>
+                        <button type="button" class="btn btn-primary mt-2" onclick="alert('Demo: Message Sent Successfully!')">Submit Message</button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-bottom">
+                &copy; 2026 NeuroCry AI Analytics. All rights reserved. (*Demo Platform)
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
