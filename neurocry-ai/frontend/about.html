@@ -212,10 +212,7 @@
             const authActions = document.getElementById('authActions');
             const token = getToken();
             if (token || true) { // Always show dashboard in guest mode
-                authActions.innerHTML = `
-                    <a href="dashboard.html" class="px-5 py-2.5 bg-medical text-white font-bold rounded-xl text-sm shadow-md transition-all hover:scale-105">Dashboard</a>
-                    <button onclick="logout()" class="text-slate-500 hover:text-red-500 font-bold text-sm">Reset Session</button>
-                `;
+                authActions.innerHTML = ``;
             }
         });
     </script>
