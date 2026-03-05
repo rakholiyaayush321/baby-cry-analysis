@@ -1,196 +1,229 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NeuroCry AI | Smart Infant Monitoring</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <!-- Updated to Inter font for SaaS look -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'], },
-                    colors: {
-                        brand: { blue: '#4A90E2', teal: '#2ED1C1', bg: '#F7F9FC' },
-                    },
-                    boxShadow: { 'soft': '0 10px 40px -10px rgba(74,144,226,0.15)', }
-                }
-            }
-        }
-    </script>
-    <style>
-        body { background-color: #F7F9FC; color: #334155; }
-        .nav-link { font-weight: 600; transition: all 0.3s; color: #64748B; font-size: 0.9rem; }
-        .nav-link:hover { color: #4A90E2; }
-        .nav-link.active { color: #4A90E2; border-bottom: 2px solid #4A90E2; }
-        .hero-gradient { background: linear-gradient(135deg, #F0F7FF 0%, #FFFFFF 100%); }
-    </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>NeuroCry AI — AI Infant Cry Analysis & Monitoring System</title>
+<meta name="description" content="NeuroCry AI helps parents and healthcare professionals understand infant crying patterns using artificial intelligence.">
+<link rel="stylesheet" href="shared.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+.hero { min-height: 88vh; display: flex; align-items: center; background: linear-gradient(160deg, #f0f7ff 0%, #f7f9fc 55%, #f0fdfa 100%); padding: 60px 24px; }
+.hero-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+.hero-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; background: rgba(74,144,226,.1); border: 1px solid rgba(74,144,226,.2); border-radius: 50px; font-size: 11px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 18px; }
+.pulse-dot { width: 7px; height: 7px; background: var(--blue); border-radius: 50%; animation: pls 2s infinite; }
+@keyframes pls { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.4)} }
+.hero h1 { font-size: clamp(2rem, 4.5vw, 3.2rem); font-weight: 900; color: var(--dark); line-height: 1.15; margin-bottom: 20px; }
+.hero h1 .gr { background: linear-gradient(135deg, var(--blue), var(--teal)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero-desc { font-size: 16px; color: var(--muted); line-height: 1.8; margin-bottom: 32px; max-width: 460px; }
+.hero-cta { display: flex; gap: 14px; flex-wrap: wrap; }
+.hero-stats { display: flex; gap: 28px; margin-top: 36px; }
+.hero-stat-val { font-size: 22px; font-weight: 900; color: var(--dark); }
+.hero-stat-label { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+.hero-visual { position: relative; display: flex; justify-content: center; }
+.hero-card { background: var(--white); border-radius: 22px; border: 1px solid var(--border); box-shadow: 0 24px 70px rgba(0,0,0,.1); padding: 28px; width: 100%; max-width: 360px; }
+.hero-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+.hc-icon { width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, var(--blue), var(--teal)); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; }
+.hc-status { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: var(--success); }
+.wv-mini { display: flex; align-items: flex-end; height: 50px; gap: 3px; margin-bottom: 18px; }
+.wv-mini .b { width: 8px; background: linear-gradient(var(--blue), var(--teal)); border-radius: 3px; animation: wave 1.2s ease-in-out infinite; }
+.wv-mini .b:nth-child(1){height:35%;animation-delay:0s}
+.wv-mini .b:nth-child(2){height:65%;animation-delay:.1s}
+.wv-mini .b:nth-child(3){height:90%;animation-delay:.2s}
+.wv-mini .b:nth-child(4){height:100%;animation-delay:.3s}
+.wv-mini .b:nth-child(5){height:75%;animation-delay:.4s}
+.wv-mini .b:nth-child(6){height:50%;animation-delay:.5s}
+.wv-mini .b:nth-child(7){height:40%;animation-delay:.6s}
+.wv-mini .b:nth-child(8){height:55%;animation-delay:.7s}
+.result-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--light); border-radius: 10px; margin-bottom: 8px; }
+.result-row:last-child { margin-bottom: 0; }
+.rr-label { font-size: 12px; color: var(--muted); font-weight: 600; }
+.rr-value { font-size: 13px; font-weight: 700; color: var(--dark); }
+.feat { background: var(--white); border-radius: 16px; padding: 28px; border: 1px solid var(--border); box-shadow: 0 2px 12px rgba(0,0,0,.04); transition: transform .2s, box-shadow .2s; }
+.feat:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(74,144,226,.12); }
+.feat-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 16px; }
+.feat h3 { font-size: 16px; font-weight: 700; color: var(--dark); margin-bottom: 8px; }
+.feat p  { font-size: 14px; color: var(--muted); line-height: 1.7; }
+.step-num { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--blue), var(--teal)); color: #fff; font-weight: 800; font-size: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.step-line { flex: 1; height: 2px; background: linear-gradient(90deg, var(--border), var(--blue-l)); margin: 0 -4px; }
+.steps { display: flex; align-items: flex-start; gap: 0; max-width: 860px; margin: 0 auto; }
+.step { flex: 1; text-align: center; position: relative; }
+.step-icon-wrap { display: flex; align-items: center; margin-bottom: 14px; }
+.step-body { padding: 0 8px; }
+.step h4 { font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 5px; }
+.step p  { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.cta-section { background: linear-gradient(135deg, var(--blue), var(--teal)); padding: 72px 24px; text-align: center; }
+.cta-section h2 { font-size: clamp(1.6rem,3vw,2.2rem); font-weight: 900; color: #fff; margin-bottom: 14px; }
+.cta-section p { font-size: 16px; color: rgba(255,255,255,.85); margin-bottom: 30px; }
+@media(max-width:860px) { .hero-inner { grid-template-columns: 1fr; text-align: center; gap: 32px; } .hero-desc,.hero-cta {margin: 0 auto 20px;} .hero-visual {display:none} .hero-stats {justify-content:center} }
+</style>
 </head>
-<body class="min-h-screen antialiased flex flex-col">
+<body>
 
-    <!-- HEADER / NAVIGATION -->
-    <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 transition-all">
-        <nav class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-brand-blue rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-                    <i class="fas fa-stethoscope text-white"></i>
-                </div>
-                <span class="text-xl font-bold tracking-tight text-slate-800">NeuroCry <span class="text-brand-blue">AI</span></span>
-            </div>
-            
-            <div class="hidden md:flex items-center gap-8">
-                <a href="index.html" class="nav-link active">Overview</a>
-                <a href="about.html" class="nav-link">Technology</a>
-                <a href="patients.html" class="nav-link">Patient Portal</a>
-                <a href="monitor.html" class="nav-link bg-teal-50 text-brand-teal px-3 py-1.5 rounded-lg hover:bg-teal-100 hover:text-teal-700 transition"><i class="fas fa-wave-square mr-1"></i> Live Analysis</a>
-            </div>
+<!-- PUBLIC NAV -->
+<nav class="pub-nav">
+  <div class="pub-nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-icon"><i class="fas fa-stethoscope"></i></div>
+      <div class="nav-logo-text">NeuroCry <span>AI</span></div>
+    </a>
+    <div class="pub-nav-links" id="pubNavLinks"></div>
+    <div class="pub-nav-cta" id="pubNavCta"></div>
+  </div>
+</nav>
 
-            <div id="authActions" class="flex gap-4 items-center">
-                <!-- Injected via auth.js -->
-            </div>
-            
-            <button class="md:hidden text-slate-600"><i class="fas fa-bars"></i></button>
-        </nav>
-    </header>
-
-    <main class="flex-1">
-        <!-- HERO SECTION -->
-        <section class="hero-gradient pt-24 pb-32 px-6 border-b border-slate-100 overflow-hidden relative">
-            
-            <!-- Abstract Background Elements -->
-            <div class="absolute top-20 left-10 w-64 h-64 bg-brand-blue/5 rounded-full blur-[80px]"></div>
-            <div class="absolute bottom-10 right-20 w-80 h-80 bg-brand-teal/5 rounded-full blur-[80px]"></div>
-
-            <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center relative z-10">
-                <div class="space-y-8 animate-fadedown">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-brand-blue text-[10px] font-bold uppercase tracking-widest">
-                        <i class="fas fa-shield-alt"></i> Clinical Grade SaaS
-                    </div>
-                    <h1 class="text-5xl lg:text-7xl font-black leading-tight text-slate-900 tracking-tight">
-                        AI-Powered <br> Infant <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-blue to-brand-teal">Monitoring</span>
-                    </h1>
-                    <p class="text-lg text-slate-500 font-medium max-w-lg leading-relaxed">
-                        A modern, secure medical platform that analyzes infant cries in real-time to detect hunger, pain, and sleep patterns with exceptional clinical accuracy.
-                    </p>
-                    <div class="flex flex-wrap gap-4 pt-4">
-                        <a href="dashboard.html" class="px-8 py-4 bg-brand-blue text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition-all flex items-center gap-2">
-                            Access Dashboard <i class="fas fa-arrow-right text-sm"></i>
-                        </a>
-                        <a href="add-patient.html" class="px-8 py-4 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-all shadow-sm">
-                            Register a Patient
-                        </a>
-                    </div>
-                </div>
-                <div class="relative hidden lg:block">
-                    <!-- Dashboard Mockup Graphic -->
-                    <div class="bg-white p-2 rounded-[2rem] shadow-soft border border-slate-100 relative z-10 transform rotate-1">
-                        <div class="bg-slate-50 rounded-[1.5rem] border border-slate-100 overflow-hidden">
-                            <!-- Mock Header -->
-                            <div class="h-6 bg-slate-100 flex items-center px-4 gap-1.5 border-b border-slate-200">
-                                <div class="w-2 h-2 rounded-full bg-red-400"></div><div class="w-2 h-2 rounded-full bg-amber-400"></div><div class="w-2 h-2 rounded-full bg-emerald-400"></div>
-                            </div>
-                            <!-- Mock Data -->
-                            <div class="p-6 grid grid-cols-2 gap-4">
-                                <div class="col-span-2 h-32 bg-gradient-to-r from-blue-50 to-teal-50 rounded-xl border border-blue-100 flex items-center justify-center relative overflow-hidden">
-                                     <div class="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPgo8cmVjdCB3aWR0aD0iOCIgaGVpZ2h0PSI4IiBmaWxsPSIjZmZmIiAvPgo8cGF0aCBkPSJNMCAwbDhfOFpNOCAwTDBfOCIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjAuNSIgb3BhY2l0eT0iMC4xIi8+Cjwvc3ZnPg==')]"></div>
-                                     <div class="text-brand-blue text-center z-10">
-                                        <i class="fas fa-wave-square text-4xl mb-2"></i>
-                                        <p class="font-bold text-sm">Real-time Spectral Analysis Active</p>
-                                     </div>
-                                </div>
-                                <div class="h-20 bg-white rounded-xl shadow-sm border border-slate-100 p-4">
-                                    <div class="w-6 h-6 rounded bg-emerald-100 text-risk-low flex items-center justify-center mb-2"><i class="fas fa-check"></i></div>
-                                    <div class="h-2 bg-slate-100 rounded w-1/2 mb-2"></div>
-                                    <div class="h-2 bg-slate-100 rounded w-3/4"></div>
-                                </div>
-                                <div class="h-20 bg-white rounded-xl shadow-sm border border-slate-100 p-4">
-                                    <div class="w-6 h-6 rounded bg-orange-100 text-risk-medium flex items-center justify-center mb-2"><i class="fas fa-bell"></i></div>
-                                    <div class="h-2 bg-slate-100 rounded w-2/3 mb-2"></div>
-                                    <div class="h-2 bg-slate-100 rounded w-1/2"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Floating Widget -->
-                    <div class="absolute -bottom-6 -left-12 bg-white p-5 rounded-2xl shadow-xl border border-slate-100 flex items-center gap-4 z-20 animate-bounce">
-                        <div class="w-12 h-12 bg-brand-blue/10 text-brand-blue rounded-xl flex items-center justify-center font-bold text-lg"><i class="fas fa-robot"></i></div>
-                        <div>
-                            <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">AI Diagnostic</p>
-                            <p class="text-sm font-black text-slate-800">Hunger Detected</p>
-                            <div class="w-full bg-slate-100 h-1.5 rounded-full mt-2">
-                                <div class="bg-brand-teal h-full rounded-full w-11/12"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- FEATURES SECTION -->
-        <section class="py-24 px-6 bg-white">
-            <div class="max-w-7xl mx-auto">
-                <div class="text-center max-w-2xl mx-auto mb-16">
-                    <h2 class="text-3xl font-bold text-slate-900 tracking-tight">Engineered for Modern Healthcare</h2>
-                    <p class="text-slate-500 mt-4 leading-relaxed font-medium">A unified SaaS interface blending predictive artificial intelligence with secure patient data management.</p>
-                </div>
-                
-                <div class="grid md:grid-cols-3 gap-8">
-                    <div class="p-8 rounded-2xl bg-brand-bg border border-slate-100 hover:border-brand-blue/30 transition-all">
-                        <div class="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center text-brand-blue mb-6">
-                            <i class="fas fa-microphone-alt text-xl"></i>
-                        </div>
-                        <h3 class="font-bold text-lg text-slate-800 mb-2">Acoustic Diagnostics</h3>
-                        <p class="text-sm text-slate-500 leading-relaxed">Instant classification of clinical vocalizations including pain, hunger, and sleep abnormalities through WebRTC.</p>
-                    </div>
-                    <div class="p-8 rounded-2xl bg-brand-bg border border-slate-100 hover:border-brand-teal/30 transition-all">
-                        <div class="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center text-brand-teal mb-6">
-                            <i class="fas fa-users text-xl"></i>
-                        </div>
-                        <h3 class="font-bold text-lg text-slate-800 mb-2">Patient Roster Tech</h3>
-                        <p class="text-sm text-slate-500 leading-relaxed">Centralized, secure record management linking biological baselines directly to historical acoustic analyses.</p>
-                    </div>
-                    <div class="p-8 rounded-2xl bg-brand-bg border border-slate-100 hover:border-indigo-300 transition-all">
-                        <div class="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center text-indigo-500 mb-6">
-                            <i class="fas fa-chart-line text-xl"></i>
-                        </div>
-                        <h3 class="font-bold text-lg text-slate-800 mb-2">Predictive Analytics</h3>
-                        <p class="text-sm text-slate-500 leading-relaxed">Cross-reference patient history with real-time detection overlays to visualize behavioral distributions.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- FOOTER -->
-    <footer class="bg-white border-t border-slate-200 py-12 px-6 mt-auto">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center text-slate-400">
-                    <i class="fas fa-stethoscope text-xs"></i>
-                </div>
-                <span class="text-sm font-bold tracking-tight text-slate-400">NeuroCry SaaS Platform</span>
-            </div>
-            <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-widest">© 2026 Clinical Data Secured.</p>
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="hero-badge"><div class="pulse-dot"></div> Live AI Analysis</div>
+      <h1>AI Powered <span class="gr">Infant Cry</span> Analysis System</h1>
+      <p class="hero-desc">NeuroCry AI helps parents and healthcare professionals understand infant crying patterns using artificial intelligence. The system analyzes baby cries and predicts possible needs such as hunger, discomfort, pain, or sleep.</p>
+      <div class="hero-cta">
+        <a href="register.html" class="btn btn-primary btn-lg"><i class="fas fa-user-plus"></i> Get Started Free</a>
+        <a href="about.html"   class="btn btn-outline btn-lg"><i class="fas fa-play-circle"></i> Learn More</a>
+      </div>
+      <div class="hero-stats">
+        <div><div class="hero-stat-val">97%</div><div class="hero-stat-label">Accuracy</div></div>
+        <div style="width:1px;background:var(--border)"></div>
+        <div><div class="hero-stat-val">7</div><div class="hero-stat-label">Cry Types</div></div>
+        <div style="width:1px;background:var(--border)"></div>
+        <div><div class="hero-stat-val">&lt;2s</div><div class="hero-stat-label">Analysis Time</div></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-card">
+        <div class="hero-card-header">
+          <div class="hc-icon"><i class="fas fa-brain"></i></div>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:var(--dark)">AI Analysis Running</div>
+            <div class="hc-status"><i class="fas fa-circle" style="font-size:7px"></i> Live Stream</div>
+          </div>
         </div>
-    </footer>
+        <div class="wv-mini"><div class="b"></div><div class="b"></div><div class="b"></div><div class="b"></div><div class="b"></div><div class="b"></div><div class="b"></div><div class="b"></div></div>
+        <div class="result-row"><span class="rr-label">Detected Pattern</span><span class="rr-value" style="color:var(--blue)">Hungry Cry</span></div>
+        <div class="result-row"><span class="rr-label">Confidence</span><span class="rr-value">94%</span></div>
+        <div class="result-row"><span class="rr-label">Risk Level</span><span class="rr-value" style="color:var(--success)"><i class="fas fa-check-circle"></i> Low</span></div>
+        <div class="result-row"><span class="rr-label">Action</span><span class="rr-value text-sm">Feed Immediately</span></div>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <script src="auth.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const authActions = document.getElementById('authActions');
-            if (authActions) {
-                authActions.innerHTML = `
-                    <button onclick="logout()" class="text-slate-400 hover:text-slate-700 font-semibold text-sm transition-colors"><i class="fas fa-sign-out-alt mr-1"></i> Sign Out</button>
-                    <a href="dashboard.html" class="px-5 py-2.5 bg-brand-blue text-white font-semibold rounded-lg text-sm shadow-sm transition-all hover:bg-blue-600">Enter System</a>
-                `;
-            }
-        });
-    </script>
+<!-- FEATURES -->
+<section class="section" style="background:var(--white)">
+  <div class="section-inner">
+    <div class="section-header">
+      <h2>Powerful AI Features</h2>
+      <p>Everything you need to monitor, analyze and respond to your infant's needs in real-time.</p>
+    </div>
+    <div class="grid-3">
+      <div class="feat">
+        <div class="feat-icon" style="background:var(--blue-l);color:var(--blue)"><i class="fas fa-microphone-lines"></i></div>
+        <h3>Cry Pattern Analysis</h3>
+        <p>Advanced AI analyzes audio and video to detect 7 distinct cry patterns with up to 97% accuracy.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon" style="background:var(--teal-l);color:var(--teal)"><i class="fas fa-bolt"></i></div>
+        <h3>Real-time Detection</h3>
+        <p>Results appear in under 2 seconds. Monitor continuously via webcam for live alerts.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon" style="background:#ede9fe;color:var(--purple)"><i class="fas fa-chart-line"></i></div>
+        <h3>Trend Analytics</h3>
+        <p>Track cry patterns over time. View history charts and compare analysis sessions for each patient.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon" style="background:#fef3c7;color:var(--warning)"><i class="fas fa-bell"></i></div>
+        <h3>Smart Alerts</h3>
+        <p>High-risk detections trigger visual alerts. Never miss a critical moment requiring immediate attention.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon" style="background:#fee2e2;color:var(--danger)"><i class="fas fa-hospital-user"></i></div>
+        <h3>Patient Management</h3>
+        <p>Maintain a full registry of patients with complete medical history and analysis records.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon" style="background:#d1fae5;color:var(--success)"><i class="fas fa-shield-halved"></i></div>
+        <h3>Secure & Private</h3>
+        <p>All data encrypted and protected. HIPAA-aligned design principles for medical data security.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section">
+  <div class="section-inner">
+    <div class="section-header">
+      <h2>How It Works</h2>
+      <p>From registration to real-time analysis in minutes.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-icon-wrap">
+          <div class="step-num">1</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-body">
+          <h4>Register</h4>
+          <p>Create account and add patient profile</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-icon-wrap">
+          <div class="step-num">2</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-body">
+          <h4>Upload / Record</h4>
+          <p>Upload audio/video or use live webcam</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-icon-wrap">
+          <div class="step-num">3</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-body">
+          <h4>AI Analysis</h4>
+          <p>System detects cry type in seconds</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-icon-wrap" style="margin-right:0">
+          <div class="step-num">4</div>
+        </div>
+        <div class="step-body">
+          <h4>Get Results</h4>
+          <p>View type, confidence, recommendations</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <h2>Ready to Protect Your Infant?</h2>
+  <p>Join thousands of parents and healthcare professionals using NeuroCry AI.</p>
+  <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+    <a href="register.html" class="btn btn-lg" style="background:#fff;color:var(--blue);box-shadow:0 4px 20px rgba(0,0,0,.15)"><i class="fas fa-user-plus"></i> Create Free Account</a>
+    <a href="login.html"    class="btn btn-lg" style="background:rgba(255,255,255,.15);color:#fff;border:2px solid rgba(255,255,255,.4)"><i class="fas fa-sign-in-alt"></i> Sign In</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="d-flex align-center gap-10">
+      <div class="nav-logo-icon" style="width:30px;height:30px;font-size:12px"><i class="fas fa-stethoscope"></i></div>
+      <span style="font-size:13px;font-weight:700;color:rgba(255,255,255,.4)">NeuroCry AI</span>
+    </div>
+    <span class="footer-copy">© 2026 NeuroCry AI — All rights reserved</span>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+<script>initPublicNav('home');</script>
 </body>
 </html>

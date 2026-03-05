@@ -1,336 +1,231 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | NeuroCry AI</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        brand: {
-                            blue: '#4A90E2', // Soft Blue
-                            teal: '#2ED1C1', // Teal / Mint
-                            bg: '#F7F9FC',   // Light Gray
-                        },
-                        risk: {
-                            low: '#10B981',    // Green
-                            medium: '#F59E0B', // Orange
-                            high: '#EF4444',   // Red
-                        }
-                    },
-                    boxShadow: {
-                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
-                        'hover': '0 10px 30px -5px rgba(74, 144, 226, 0.15)',
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        body { background-color: #F7F9FC; color: #334155; }
-        .sidebar-link { transition: all 0.2s ease-in-out; }
-        .sidebar-link:hover, .sidebar-link.active { background-color: #EFF6FF; color: #4A90E2; font-weight: 600; border-right: 4px solid #4A90E2; }
-        .sidebar-link.active i { color: #4A90E2; }
-        .card-hover { transition: all 0.3s ease; }
-        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 10px 30px -5px rgba(74, 144, 226, 0.15); }
-        .table-row-hover:hover { background-color: #F8FAFC; }
-    </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Dashboard | NeuroCry AI</title>
+<link rel="stylesheet" href="shared.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+.welcome-bar { background: linear-gradient(135deg, var(--blue), var(--teal)); border-radius: 16px; padding: 20px 24px; color: #fff; display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+.welcome-bar h2 { font-size: 18px; font-weight: 700; }
+.welcome-bar p  { font-size: 13px; opacity: .85; margin-top: 3px; }
+.empty-state    { text-align: center; padding: 48px 24px; color: var(--muted); }
+.empty-state i  { font-size: 40px; margin-bottom: 12px; opacity: .4; }
+.skeleton       { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: skeleton 1.5s infinite; border-radius: 6px; }
+@keyframes skeleton { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+</style>
 </head>
-<body class="min-h-screen flex antialiased">
+<body class="app-layout">
 
-    <!-- SIDEBAR NAVIGATION -->
-    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col fixed h-full z-20 transition-transform duration-300 md:translate-x-0 -translate-x-full" id="sidebar">
-        <!-- Logo -->
-        <div class="h-20 flex items-center px-6 border-b border-slate-100">
-            <div class="w-8 h-8 bg-brand-blue rounded-lg flex items-center justify-center mr-3 shadow-lg shadow-blue-500/20">
-                <i class="fas fa-stethoscope text-white text-sm"></i>
-            </div>
-            <span class="text-xl font-bold tracking-tight text-slate-800">NeuroCry <span class="text-brand-blue">AI</span></span>
-        </div>
+<!-- SIDEBAR -->
+<aside class="sidebar" id="appSidebar"></aside>
 
-        <!-- Nav Links -->
-        <nav class="flex-1 overflow-y-auto py-6 space-y-1">
-            <a href="dashboard.html" class="sidebar-link active flex items-center px-6 py-3 text-slate-500">
-                <i class="fas fa-chart-pie w-5 mr-3 text-slate-400"></i> Dashboard
-            </a>
-            <a href="patients.html" class="sidebar-link flex items-center px-6 py-3 text-slate-500">
-                <i class="fas fa-users w-5 mr-3 text-slate-400"></i> Patient List
-            </a>
-            <a href="add-patient.html" class="sidebar-link flex items-center px-6 py-3 text-slate-500">
-                <i class="fas fa-user-plus w-5 mr-3 text-slate-400"></i> Register Patient
-            </a>
-            <a href="monitor.html" class="sidebar-link flex items-center px-6 py-3 text-slate-500">
-                <i class="fas fa-wave-square w-5 mr-3 text-slate-400"></i> Cry Analysis
-            </a>
-        </nav>
+<!-- MAIN -->
+<div class="app-main">
+  <header class="app-topbar">
+    <div class="d-flex align-center gap-10">
+      <button id="sidebarToggle" style="background:none;border:none;font-size:20px;color:var(--muted);display:none" class="md-only"><i class="fas fa-bars"></i></button>
+      <h1>Overview</h1>
+    </div>
+    <div class="topbar-right">
+      <div id="sysStatus" class="badge badge-blue"><i class="fas fa-circle" style="font-size:8px"></i> System Online</div>
+      <button onclick="downloadBackup()" class="btn btn-ghost btn-sm" id="backupBtn"><i class="fas fa-download"></i> Backup</button>
+      <button onclick="loadDashboard()" class="btn btn-ghost btn-sm"><i class="fas fa-rotate-right"></i> Refresh</button>
+      <a href="add-patient.html" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> New Patient</a>
+    </div>
+  </header>
 
-        <!-- Footer / User -->
-        <div class="p-6 border-t border-slate-100">
-            <button onclick="logout()" class="flex items-center text-slate-500 hover:text-red-500 transition-colors text-sm font-medium w-full">
-                <i class="fas fa-sign-out-alt mr-3"></i> Sign Out
-            </button>
-        </div>
-    </aside>
+  <div class="app-content">
 
-    <!-- MAIN CONTENT -->
-    <div class="flex-1 md:ml-64 flex flex-col min-h-screen">
-        
-        <!-- TOP HEADER -->
-        <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-10">
-            <div class="flex items-center gap-4">
-                <button class="md:hidden text-slate-500" onclick="document.getElementById('sidebar').classList.toggle('-translate-x-full')">
-                    <i class="fas fa-bars text-xl"></i>
-                </button>
-                <h1 class="text-2xl font-bold text-slate-800">Overview</h1>
-            </div>
-            
-            <div class="flex items-center gap-6">
-                <!-- Status Badge -->
-                <div class="hidden sm:flex items-center gap-2 bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-full text-xs font-semibold border border-emerald-100">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    System Online
-                </div>
-                <!-- Profile -->
-                <div class="w-10 h-10 bg-slate-100 rounded-full border border-slate-200 flex items-center justify-center text-slate-600">
-                    <i class="fas fa-user-md"></i>
-                </div>
-            </div>
-        </header>
-
-        <!-- DASHBOARD CONTENT -->
-        <main class="flex-1 p-8">
-            
-            <div class="mb-8">
-                <p class="text-slate-500">Welcome back, Dr. Smith. Here is the daily summary of your infant monitoring unit.</p>
-            </div>
-
-            <!-- STATS CARDS -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 text-slate-700" id="statsContainer">
-                <!-- Loading State dynamically replaced -->
-                <div class="bg-white p-6 rounded-2xl shadow-soft card-hover border border-slate-100">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-sm font-medium text-slate-400 mb-1">Total Patients</p>
-                            <h3 class="text-3xl font-bold text-slate-800" id="stat-total-patients">--</h3>
-                        </div>
-                        <div class="w-12 h-12 rounded-full bg-blue-50 text-brand-blue flex items-center justify-center text-xl">
-                            <i class="fas fa-bed"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white p-6 rounded-2xl shadow-soft card-hover border border-slate-100">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-sm font-medium text-slate-400 mb-1">Total Analyses</p>
-                            <h3 class="text-3xl font-bold text-slate-800" id="stat-total-analyses">--</h3>
-                        </div>
-                        <div class="w-12 h-12 rounded-full bg-teal-50 text-brand-teal flex items-center justify-center text-xl">
-                            <i class="fas fa-file-audio"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white p-6 rounded-2xl shadow-soft card-hover border border-slate-100">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-sm font-medium text-slate-400 mb-1">Recent Analyses</p>
-                            <h3 class="text-3xl font-bold text-slate-800" id="stat-recent-analyses">--</h3>
-                        </div>
-                        <div class="w-12 h-12 rounded-full bg-purple-50 text-purple-500 flex items-center justify-center text-xl">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white p-6 rounded-2xl shadow-soft card-hover border border-slate-100">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-sm font-medium text-slate-400 mb-1">Alerts Detected</p>
-                            <h3 class="text-3xl font-bold text-slate-800" id="stat-alerts">--</h3>
-                        </div>
-                        <div class="w-12 h-12 rounded-full bg-orange-50 text-brand-medium flex items-center justify-center text-xl">
-                            <i class="fas fa-bell"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- RECENT ANALYSES TABLE -->
-            <div class="bg-white rounded-2xl shadow-soft border border-slate-100 overflow-hidden">
-                <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center">
-                    <h2 class="text-lg font-bold text-slate-800">Recent Cry Analyses</h2>
-                    <a href="patients.html" class="text-sm font-medium text-brand-blue hover:text-blue-700">View All Patients</a>
-                </div>
-                
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
-                                <th class="px-6 py-4 font-medium">Patient Details</th>
-                                <th class="px-6 py-4 font-medium">Cry Type</th>
-                                <th class="px-6 py-4 font-medium">Confidence</th>
-                                <th class="px-6 py-4 font-medium">Risk Level</th>
-                                <th class="px-6 py-4 font-medium text-right">Time</th>
-                            </tr>
-                        </thead>
-                        <tbody id="analysesTableBody" class="divide-y divide-slate-100 text-sm">
-                            <tr>
-                                <td colspan="5" class="px-6 py-8 text-center text-slate-400">Loading recent analyses...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-        </main>
+    <!-- WELCOME -->
+    <div class="welcome-bar">
+      <div>
+        <h2 id="welcomeName">Welcome back! 👋</h2>
+        <p id="welcomeDate">Loading dashboard...</p>
+      </div>
+      <a href="add-patient.html" class="btn" style="background:rgba(255,255,255,.2);color:#fff;border:1.5px solid rgba(255,255,255,.35)">
+        <i class="fas fa-user-plus"></i> Register New Patient
+      </a>
     </div>
 
-    <script src="auth.js"></script>
-    <script>
-        // API Configuration
-        const API_URL = 'http://localhost:8000';
+    <!-- STAT CARDS -->
+    <div class="stat-cards mb-24">
+      <div class="stat-card">
+        <div class="stat-icon blue"><i class="fas fa-hospital-user"></i></div>
+        <div><div class="stat-label">Total Patients</div><div class="stat-value" id="statPatients">—</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon teal"><i class="fas fa-file-waveform"></i></div>
+        <div><div class="stat-label">Total Analyses</div><div class="stat-value" id="statAnalyses">—</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon red"><i class="fas fa-triangle-exclamation"></i></div>
+        <div><div class="stat-label">Risk Alerts</div><div class="stat-value" id="statAlerts">—</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple"><i class="fas fa-wave-square"></i></div>
+        <div><div class="stat-label">Live Status</div><div class="stat-value" style="font-size:16px;color:var(--success)">Online</div></div>
+      </div>
+    </div>
 
-        async function fetchDashboardData() {
-            try {
-                // Fetch Stats
-                const statsRes = await fetch(`${API_URL}/api/stats`);
-                if (statsRes.ok) {
-                    const stats = await statsRes.json();
-                    document.getElementById('stat-total-patients').textContent = stats.total_patients;
-                    document.getElementById('stat-total-analyses').textContent = stats.total_analyses;
-                    document.getElementById('stat-recent-analyses').textContent = stats.recent_analyses_count;
-                    
-                    // Count high risk alerts for the 'alerts detected' card
-                    // This is an estimate as the stats endpoint doesn't explicitly return alerts
-                    document.getElementById('stat-alerts').textContent = Math.floor(stats.recent_analyses_count * 0.2) || 0;
-                }
+    <!-- PATIENTS TABLE + CRY CHART -->
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;align-items:start">
 
-                // Fetch Recent Analyses (using patients endpoint to extrapolate)
-                const patientsRes = await fetch(`${API_URL}/api/patients`);
-                if (patientsRes.ok) {
-                    const patients = await patientsRes.json();
-                    renderRecentAnalyses(patients);
-                }
-            } catch (err) {
-                console.error("Dashboard Error:", err);
-                document.getElementById('analysesTableBody').innerHTML = `
-                    <tr><td colspan="5" class="px-6 py-4 text-center text-red-500">Failed to load data. Ensure backend is running.</td></tr>
-                `;
-            }
-        }
+      <!-- PATIENT TABLE -->
+      <div class="card">
+        <div class="card-header">
+          <h2><i class="fas fa-users" style="color:var(--blue);margin-right:8px"></i>Recent Patients</h2>
+          <a href="patients.html" class="btn btn-ghost btn-sm">View All <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="tbl" id="patientTable">
+            <thead>
+              <tr>
+                <th>Patient</th>
+                <th>Age</th>
+                <th>Weight</th>
+                <th>Last Analysis</th>
+                <th>Cry Type</th>
+                <th>Risk</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="patientTableBody">
+              <tr><td colspan="7" class="empty-state"><i class="fas fa-circle-notch fa-spin"></i><br>Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-        function getRiskLevel(cryType) {
-            const highRisk = ['pain', 'discomfort', 'asphyxia', 'abnormal'];
-            const lowRisk = ['hunger', 'sleepy', 'burping', 'normal'];
-            
-            const lowerType = String(cryType).toLowerCase();
-            
-            for(let r of highRisk) {
-                if(lowerType.includes(r)) return 'High';
-            }
-            for(let r of lowRisk) {
-                if(lowerType.includes(r)) return 'Low';
-            }
-            return 'Medium';
-        }
+      <!-- CRY DISTRIBUTION -->
+      <div class="card card-pad">
+        <h2 style="font-size:14px;font-weight:700;color:var(--dark);margin-bottom:16px"><i class="fas fa-chart-pie" style="color:var(--blue);margin-right:8px"></i>Cry Distribution</h2>
+        <div id="chartWrap" style="position:relative;height:200px">
+          <canvas id="cryChart"></canvas>
+        </div>
+        <div id="chartEmpty" class="empty-state" style="display:none;padding:24px">
+          <i class="fas fa-chart-pie"></i><p style="font-size:13px">No analysis data yet</p>
+        </div>
+        <div id="chartLegend" style="margin-top:14px"></div>
+      </div>
+    </div>
 
-        function renderRecentAnalyses(patients) {
-            const tableBody = document.getElementById('analysesTableBody');
-            
-            // Extract all analyses from all patients
-            let allAnalyses = [];
-            patients.forEach(p => {
-                if (p.analyses && p.analyses.length > 0) {
-                    p.analyses.forEach(a => {
-                        allAnalyses.push({
-                            patientName: p.name,
-                            age: p.age_weeks,
-                            patientId: p.id,
-                            ...a
-                        });
-                    });
-                }
-            });
+  </div><!-- /app-content -->
+</div>
 
-            // Demo mock data if DB is empty to show the design
-            if (allAnalyses.length === 0) {
-                allAnalyses = [
-                    { patientName: 'Liam Johnson', age: 12, prediction: 'Hunger', confidence: 0.92, timestamp: new Date().toISOString() },
-                    { patientName: 'Emma Davis', age: 4, prediction: 'Pain', confidence: 0.88, timestamp: new Date(Date.now() - 3600000).toISOString() },
-                    { patientName: 'Noah Smith', age: 8, prediction: 'Sleepy', confidence: 0.75, timestamp: new Date(Date.now() - 7200000).toISOString() }
-                ];
-            }
+<script src="app.js"></script>
+<script>
+  requireAuth();
+  initSidebar('dashboard');
 
-            // Sort by timestamp decending
-            allAnalyses.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            
-            // Render top 5
-            tableBody.innerHTML = '';
-            
-            allAnalyses.slice(0, 5).forEach(analysis => {
-                const risk = getRiskLevel(analysis.prediction);
-                
-                // Color mapping
-                let riskBadgeClass = '';
-                if(risk === 'Low') riskBadgeClass = 'bg-risk-low/10 text-risk-low border-risk-low/20';
-                else if(risk === 'Medium') riskBadgeClass = 'bg-risk-medium/10 text-risk-medium border-risk-medium/20';
-                else riskBadgeClass = 'bg-risk-high/10 text-risk-high border-risk-high/20';
+  const user = getUser();
+  document.getElementById('welcomeName').textContent = `Welcome back, ${user.name || 'Doctor'} 👋`;
+  document.getElementById('welcomeDate').textContent = new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
 
-                const tr = document.createElement('tr');
-                tr.className = 'table-row-hover transition-colors cursor-pointer';
-                tr.onclick = () => { if(analysis.patientId) window.location.href = `profile.html?id=${analysis.patientId}`; };
+  let cryChartInst = null;
 
-                const dateObj = new Date(analysis.timestamp);
-                const timeString = dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                const dateString = dateObj.toLocaleDateString([], {month: 'short', day: 'numeric'});
+  async function loadDashboard() {
+    try {
+      const data = await apiJSON('/api/dashboard');
+      if (!data) return;
 
-                tr.innerHTML = `
-                    <td class="px-6 py-4">
-                        <div class="flex items-center">
-                            <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-xs mr-3">
-                                ${analysis.patientName.charAt(0)}
-                            </div>
-                            <div>
-                                <div class="font-semibold text-slate-800">${analysis.patientName}</div>
-                                <div class="text-xs text-slate-500">${analysis.age} weeks old</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 font-medium text-slate-700 capitalize">
-                        ${analysis.prediction.replace('_', ' ')}
-                    </td>
-                    <td class="px-6 py-4">
-                        <div class="flex items-center gap-2">
-                            <div class="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                                <div class="h-full bg-brand-blue" style="width: ${Math.round(analysis.confidence * 100)}%"></div>
-                            </div>
-                            <span class="text-xs font-semibold text-slate-600">${Math.round(analysis.confidence * 100)}%</span>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4">
-                        <span class="px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider border ${riskBadgeClass}">
-                            ${risk}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 text-right text-slate-500 text-sm">
-                        ${dateString} <span class="text-slate-400 ml-1">${timeString}</span>
-                    </td>
-                `;
-                tableBody.appendChild(tr);
-            });
-        }
+      document.getElementById('statPatients').textContent = data.total_patients;
+      document.getElementById('statAnalyses').textContent = data.total_analyses;
+      document.getElementById('statAlerts').textContent   = data.risk_alerts;
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', fetchDashboardData);
-    </script>
+      renderPatientTable(data.recent_patients || []);
+      renderCryChart(data.cry_distribution || {});
+    } catch (err) {
+      document.getElementById('patientTableBody').innerHTML =
+        `<tr><td colspan="7" class="empty-state" style="color:var(--danger)"><i class="fas fa-exclamation-triangle"></i><br>${err.message}</td></tr>`;
+    }
+  }
+
+  function renderPatientTable(patients) {
+    const tbody = document.getElementById('patientTableBody');
+    if (!patients.length) {
+      tbody.innerHTML = `<tr><td colspan="7">
+        <div class="empty-state"><i class="fas fa-users"></i><p>No patients yet. <a href="add-patient.html" style="color:var(--blue);font-weight:700">Register your first patient →</a></p></div>
+      </td></tr>`;
+      return;
+    }
+    tbody.innerHTML = patients.map(p => `
+      <tr style="cursor:pointer" onclick="location.href='profile.html?id=${p.id}'">
+        <td>
+          <div class="d-flex align-center gap-10">
+            <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--teal));color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center">${(p.name||'?')[0].toUpperCase()}</div>
+            <div><div class="font-bold" style="color:var(--dark)">${p.name}</div><div class="text-xs text-muted">${p.parent_name || '—'}</div></div>
+          </div>
+        </td>
+        <td>${p.age_weeks || '—'}w</td>
+        <td>${p.weight || '—'}kg</td>
+        <td>${timeAgo(p.last_analysis)}</td>
+        <td>${p.last_cry_type || '—'}</td>
+        <td>${riskBadge(p.last_risk_level)}</td>
+        <td><a href="profile.html?id=${p.id}" class="btn btn-ghost btn-sm"><i class="fas fa-eye"></i></a></td>
+      </tr>`).join('');
+  }
+
+  const COLORS = ['#4A90E2','#2ED1C1','#EF4444','#F59E0B','#10B981','#8B5CF6','#F97316'];
+
+  function renderCryChart(dist) {
+    const labels = Object.keys(dist);
+    const values = Object.values(dist);
+    const wrap   = document.getElementById('chartWrap');
+    const empty  = document.getElementById('chartEmpty');
+    const legend = document.getElementById('chartLegend');
+
+    if (!labels.length) { wrap.style.display='none'; empty.style.display='block'; return; }
+    wrap.style.display='block'; empty.style.display='none';
+
+    if (cryChartInst) cryChartInst.destroy();
+    cryChartInst = new Chart(document.getElementById('cryChart'), {
+      type: 'doughnut',
+      data: { labels, datasets: [{ data: values, backgroundColor: COLORS, borderWidth: 0, hoverOffset: 6 }] },
+      options: { responsive: true, maintainAspectRatio: false, cutout: '68%',
+        plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(15,23,42,.85)', padding: 10, cornerRadius: 8 } } }
+    });
+
+    legend.innerHTML = labels.map((l, i) => `
+      <div class="d-flex align-center gap-6" style="margin-bottom:6px">
+        <div style="width:10px;height:10px;border-radius:50%;background:${COLORS[i % COLORS.length]}"></div>
+        <span class="text-xs text-muted font-bold">${l}</span>
+        <span class="text-xs" style="margin-left:auto;font-weight:700;color:var(--dark)">${values[i]}</span>
+      </div>`).join('');
+  }
+
+  async function downloadBackup() {
+    const btn = document.getElementById('backupBtn');
+    const originalHtml = btn.innerHTML;
+    try {
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exporting...';
+      btn.disabled = true;
+
+      const res = await apiFetch('/api/backup');
+      if (!res.ok) throw new Error((await res.json()).error || 'Failed to download backup');
+
+      // Create blob and force download
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `neurocry-backup-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      
+      showToast('Backup downloaded successfully', 'success');
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      btn.innerHTML = originalHtml;
+      btn.disabled = false;
+    }
+  }
+
+  loadDashboard();
+</script>
 </body>
 </html>

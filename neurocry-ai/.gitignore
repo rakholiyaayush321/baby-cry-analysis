@@ -1,0 +1,20 @@
+# Python Virtual Environment
+venv/
+__pycache__/
+*.pyc
+
+# Node Modules
+node-backend/node_modules/
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary and Backup files
+temp/
+*.zip
+*.bak
+
+# Environment variables
+.env

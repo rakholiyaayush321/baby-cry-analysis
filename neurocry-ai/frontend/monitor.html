@@ -1,413 +1,262 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Cry Analysis | NeuroCry AI</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'], },
-                    colors: {
-                        brand: { blue: '#4A90E2', teal: '#2ED1C1', bg: '#F7F9FC' },
-                        risk: { low: '#10B981', medium: '#F59E0B', high: '#EF4444' }
-                    },
-                    boxShadow: { 'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)', }
-                }
-            }
-        }
-    </script>
-    <style>
-        body { background-color: #F7F9FC; color: #334155; }
-        .sidebar-link { transition: all 0.2s ease-in-out; }
-        .sidebar-link:hover, .sidebar-link.active { background-color: #EFF6FF; color: #4A90E2; font-weight: 600; border-right: 4px solid #4A90E2; }
-        .sidebar-link.active i { color: #4A90E2; }
-        
-        /* Waveform Animation */
-        .waveform { display: flex; align-items: flex-end; justify-content: center; height: 100px; gap: 4px; }
-        .bar { width: 8px; background-color: #4A90E2; border-radius: 4px; animation: bounce 1.2s ease-in-out infinite; opacity: 0.8; }
-        .bar:nth-child(2) { animation-delay: 0.1s; height: 40%; }
-        .bar:nth-child(3) { animation-delay: 0.2s; height: 70%; }
-        .bar:nth-child(4) { animation-delay: 0.3s; height: 90%; }
-        .bar:nth-child(5) { animation-delay: 0.4s; height: 50%; }
-        .bar:nth-child(6) { animation-delay: 0.5s; height: 30%; }
-        .bar:nth-child(7) { animation-delay: 0.6s; height: 80%; }
-        
-        /* Confidence Circle */
-        .circular-chart { display: block; margin: 0 auto; max-width: 80%; max-height: 250px; }
-        .circle-bg { fill: none; stroke: #F1F5F9; stroke-width: 3.8; }
-        .circle { fill: none; stroke-width: 2.8; stroke-linecap: round; transition: stroke-dasharray 1s ease-out; }
-        
-        @keyframes bounce {
-            0%, 100% { transform: scaleY(0.3); }
-            50% { transform: scaleY(1); }
-        }
-        .analyzing-pulse { animation: pulseBg 2s infinite; }
-        @keyframes pulseBg { 0% { box-shadow: 0 0 0 0 rgba(74, 144, 226, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(74, 144, 226, 0); } 100% { box-shadow: 0 0 0 0 rgba(74, 144, 226, 0); } }
-    </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Live Monitoring | NeuroCry AI</title>
+<link rel="stylesheet" href="shared.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+.monitor-grid { display: grid; grid-template-columns: 340px 1fr; gap: 20px; }
+.ws-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); transition: background .3s; }
+.ws-dot.live { background: var(--success); animation: pls 2s infinite; }
+@keyframes pls { 0%,100%{opacity:1}50%{opacity:.4} }
+.result-big { font-size: 2.8rem; font-weight: 900; color: var(--dark); }
+.conf-ring  { position: relative; width: 130px; height: 130px; margin: 0 auto; }
+.alert-log  { max-height: 240px; overflow-y: auto; }
+.alert-item { display: flex; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 13px; }
+.alert-item:last-child { border-bottom: none; }
+.alert-high { background: #fef2f2; }
+@media(max-width:900px){ .monitor-grid { grid-template-columns: 1fr; } }
+</style>
 </head>
-<body class="min-h-screen flex antialiased">
+<body class="app-layout">
 
-    <!-- SIDEBAR NAVIGATION -->
-    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col fixed h-full z-20 transition-transform duration-300 md:translate-x-0 -translate-x-full" id="sidebar">
-        <!-- Logo -->
-        <div class="h-20 flex items-center px-6 border-b border-slate-100">
-            <div class="w-8 h-8 bg-brand-blue rounded-lg flex items-center justify-center mr-3 shadow-lg shadow-blue-500/20">
-                <i class="fas fa-stethoscope text-white text-sm"></i>
-            </div>
-            <span class="text-xl font-bold tracking-tight text-slate-800">NeuroCry <span class="text-brand-blue">AI</span></span>
-        </div>
+<aside class="sidebar" id="appSidebar"></aside>
 
-        <!-- Nav Links -->
-        <nav class="flex-1 overflow-y-auto py-6 space-y-1">
-            <a href="dashboard.html" class="sidebar-link flex items-center px-6 py-3 text-slate-500">
-                <i class="fas fa-chart-pie w-5 mr-3 text-slate-400"></i> Dashboard
-            </a>
-            <a href="patients.html" class="sidebar-link flex items-center px-6 py-3 text-slate-500">
-                <i class="fas fa-users w-5 mr-3 text-slate-400"></i> Patient List
-            </a>
-            <a href="add-patient.html" class="sidebar-link flex items-center px-6 py-3 text-slate-500">
-                <i class="fas fa-user-plus w-5 mr-3 text-slate-400"></i> Register Patient
-            </a>
-            <a href="monitor.html" class="sidebar-link active flex items-center px-6 py-3 text-slate-500">
-                <i class="fas fa-wave-square w-5 mr-3 text-slate-400"></i> Cry Analysis
-            </a>
-        </nav>
-
-        <!-- Footer / User -->
-        <div class="p-6 border-t border-slate-100">
-            <button onclick="logout()" class="flex items-center text-slate-500 hover:text-red-500 transition-colors text-sm font-medium w-full">
-                <i class="fas fa-sign-out-alt mr-3"></i> Sign Out
-            </button>
-        </div>
-    </aside>
-
-    <!-- MAIN CONTENT -->
-    <div class="flex-1 md:ml-64 flex flex-col min-h-screen">
-        
-        <!-- TOP HEADER -->
-        <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-10">
-            <div class="flex items-center gap-4">
-                <button class="md:hidden text-slate-500" onclick="document.getElementById('sidebar').classList.toggle('-translate-x-full')">
-                    <i class="fas fa-bars text-xl"></i>
-                </button>
-                <h1 class="text-2xl font-bold text-slate-800">Live Cry Analysis</h1>
-            </div>
-            
-            <div class="flex items-center gap-6">
-                <!-- Status Badge -->
-                <div id="wsIndicator" class="hidden sm:flex items-center gap-2 bg-slate-100 text-slate-500 px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-200">
-                    <span class="w-2 h-2 rounded-full bg-slate-400"></span> Disconnected
-                </div>
-            </div>
-        </header>
-
-        <!-- MONITORING CONTENT -->
-        <main class="flex-1 p-8 grid lg:grid-cols-12 gap-8">
-            
-            <!-- LEFT COLUMN: Stream / Controls -->
-            <div class="lg:col-span-4 space-y-6">
-                
-                <div class="bg-white rounded-2xl shadow-soft border border-slate-100 overflow-hidden text-center p-6">
-                    <div class="w-16 h-16 bg-brand-blue/10 text-brand-blue rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl">
-                        <i class="fas fa-microphone"></i>
-                    </div>
-                    <h3 class="font-bold text-slate-800 text-lg">Input Stream</h3>
-                    <p class="text-sm text-slate-500 mb-6">Select a patient to bind this monitoring session to their medical record.</p>
-                    
-                    <div class="text-left space-y-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Assign to Patient</label>
-                            <select id="patientSelect" class="w-full border border-slate-200 rounded-lg px-4 py-2 text-sm text-slate-700 outline-none focus:border-brand-blue">
-                                <option value="">-- Guest Session (Not Saved) --</option>
-                            </select>
-                        </div>
-                        
-                        <div class="border-t border-slate-100 pt-4 mt-2">
-                            <button id="cameraToggle" class="w-full py-3 bg-brand-bg hover:bg-slate-100 text-slate-700 font-bold rounded-lg transition border border-slate-200 shadow-sm flex items-center justify-center gap-2 mb-3">
-                                <i class="fas fa-video"></i> Start Video Feed
-                            </button>
-                            <button id="micToggle" class="w-full analyzing-pulse py-3 bg-brand-blue hover:bg-blue-600 text-white font-bold rounded-lg shadow-md transition flex items-center justify-center gap-2">
-                                <i class="fas fa-microphone-lines"></i> Start Diagnostic Audio
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Hidden video container but keep audio active -->
-                <video id="webcam" autoplay playsinline muted class="hidden w-full aspect-video bg-slate-900 rounded-2xl shadow-soft border border-slate-200"></video>
-            </div>
-
-            <!-- RIGHT COLUMN: Analysis Dashboard -->
-            <div class="lg:col-span-8 flex flex-col h-full bg-white rounded-2xl shadow-soft border border-slate-100 overflow-hidden relative">
-                
-                <div class="px-8 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                    <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                        <i class="fas fa-brain text-brand-blue"></i> AI Assessment Result
-                    </h2>
-                    <span id="updateTime" class="text-xs font-semibold text-slate-400">Waiting for stream...</span>
-                </div>
-
-                <!-- Before Stream / During Stream State -->
-                <div id="idleState" class="flex-1 flex flex-col items-center justify-center p-12 text-center opacity-100 absolute inset-0 bg-white z-10 transition-opacity top-16">
-                    <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center text-3xl text-slate-300 mb-6">
-                        <i class="fas fa-wave-square"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold text-slate-700 mb-2">Awaiting Audio Stream</h3>
-                    <p class="text-slate-500 max-w-sm">Start the microphone on the left to begin real-time neural network analysis.</p>
-                </div>
-
-                <!-- Analysis Result State -->
-                <div class="flex-1 p-8 grid lg:grid-cols-2 gap-8 items-center" id="resultState" style="opacity: 0;">
-                    
-                    <!-- Confidence Ring -->
-                    <div class="text-center">
-                        <svg viewBox="0 0 36 36" class="circular-chart text-brand-blue" id="confidenceSvg">
-                            <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                            <path class="circle" id="confidenceRing" stroke="currentColor" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                            <text x="18" y="20.35" font-family="Inter" font-weight="bold" font-size="8" fill="#334155" text-anchor="middle" id="confidenceText">0%</text>
-                            <text x="18" y="25" font-family="Inter" font-size="2.5" font-weight="600" fill="#64748b" text-anchor="middle" letter-spacing="0.5">CONFIDENCE</text>
-                        </svg>
-                    </div>
-
-                    <!-- Details -->
-                    <div class="space-y-6">
-                        <div>
-                            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Detected Signature</p>
-                            <h2 class="text-5xl font-black text-slate-800 capitalize tracking-tight" id="predClass">Hungry</h2>
-                        </div>
-                        
-                        <div class="flex items-center gap-3">
-                            <div class="px-4 py-1.5 rounded-lg text-sm font-bold border" id="riskBadge">
-                                <i class="fas fa-check-circle mr-1"></i> Low Risk
-                            </div>
-                        </div>
-
-                        <!-- Animated Waveform simulating listening -->
-                        <div class="bg-slate-50 border border-slate-100 rounded-xl p-4 flex items-center justify-between">
-                            <span class="text-xs font-semibold text-slate-500 uppercase flex items-center gap-2">
-                                <span class="w-2 h-2 rounded-full bg-brand-blue animate-pulse"></span> PROCESSING
-                            </span>
-                            <div class="waveform h-8">
-                                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-                                <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
-                            </div>
-                        </div>
-
-                        <div class="bg-blue-50 border border-blue-100 p-4 rounded-xl border-l-4 border-l-brand-blue" id="actionBox">
-                            <h4 class="font-bold text-brand-blue text-sm mb-1"><i class="fas fa-info-circle mr-1"></i> Recommended Action</h4>
-                            <p class="text-sm text-blue-800/80 font-medium">Feed the infant within the next few minutes. Monitor feeding amount.</p>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </main>
+<div class="app-main">
+  <header class="app-topbar">
+    <div class="d-flex align-center gap-10">
+      <button id="sidebarToggle" style="background:none;border:none;font-size:20px;color:var(--muted)"><i class="fas fa-bars"></i></button>
+      <h1>Live Monitoring</h1>
     </div>
+    <div class="topbar-right">
+      <div class="d-flex align-center gap-6" id="statusPill" style="padding:6px 14px;border-radius:50px;background:var(--light);border:1px solid var(--border);font-size:12px;font-weight:700;color:var(--muted)">
+        <div class="ws-dot" id="statusDot"></div>
+        <span id="statusTxt">Disconnected</span>
+      </div>
+    </div>
+  </header>
 
-    <!-- SCRIPT LOGIC (Keeping WebRTC/WS logic from before but binding to new UI) -->
-    <script src="auth.js"></script>
-    <script>
-        const API_URL = 'http://localhost:8000';
-        let isStreaming = false;
-        let isVideoStreaming = false;
-        let ws;
-        let audioContext;
-        let mediaStream;
+  <div class="app-content">
+    <div class="monitor-grid">
 
-        // UI Elements
-        const patientSelect = document.getElementById('patientSelect');
-        const cameraToggle = document.getElementById('cameraToggle');
-        const micToggle = document.getElementById('micToggle');
-        const videoElement = document.getElementById('webcam');
-        const wsIndicator = document.getElementById('wsIndicator');
-        
-        const idleState = document.getElementById('idleState');
-        const resultState = document.getElementById('resultState');
+      <!-- LEFT: Controls -->
+      <div style="display:flex;flex-direction:column;gap:16px">
 
-        // Fetch Patients for Dropdown
-        async function fetchPatients() {
-            try {
-                const res = await fetch(`${API_URL}/api/patients`, {
-                    headers: { 'Authorization': `Bearer ${getToken()}` }
-                });
-                if(res.ok) {
-                    const patients = await res.json();
-                    patients.forEach(p => {
-                        const opt = document.createElement('option');
-                        opt.value = p.id;
-                        opt.textContent = `${p.name} (${p.age_weeks}w)`;
-                        patientSelect.appendChild(opt);
-                    });
-                }
-            } catch(e) { console.error("Could not fetch patients", e); }
-        }
+        <!-- Patient Select -->
+        <div class="card card-pad">
+          <h3 class="font-bold" style="color:var(--dark);margin-bottom:14px"><i class="fas fa-user" style="color:var(--blue);margin-right:6px"></i>Session Setup</h3>
+          <div class="form-group">
+            <label class="form-label">Assign to Patient (optional)</label>
+            <select id="patientSelect" class="form-select"><option value="">— Guest Session —</option></select>
+          </div>
+          <button class="btn btn-primary btn-block" id="startBtn" onclick="startMonitoring()">
+            <i class="fas fa-play"></i> Start Monitoring
+          </button>
+          <button class="btn btn-danger btn-block mt-8" id="stopBtn" style="display:none" onclick="stopMonitoring()">
+            <i class="fas fa-stop"></i> Stop Monitoring
+          </button>
+        </div>
 
-        // Toggle Video
-        cameraToggle.addEventListener('click', async () => {
-            if(!isVideoStreaming) {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                    videoElement.srcObject = stream;
-                    videoElement.classList.remove('hidden');
-                    cameraToggle.innerHTML = '<i class="fas fa-video-slash"></i> Stop Video';
-                    cameraToggle.classList.replace('bg-brand-bg', 'bg-red-50');
-                    cameraToggle.classList.replace('text-slate-700', 'text-red-500');
-                    isVideoStreaming = true;
-                } catch(err) { alert("Camera access denied."); }
-            } else {
-                videoElement.srcObject.getTracks().forEach(t => t.stop());
-                videoElement.srcObject = null;
-                videoElement.classList.add('hidden');
-                cameraToggle.innerHTML = '<i class="fas fa-video"></i> Start Video Feed';
-                cameraToggle.classList.replace('bg-red-50', 'bg-brand-bg');
-                cameraToggle.classList.replace('text-red-500', 'text-slate-700');
-                isVideoStreaming = false;
-            }
-        });
+        <!-- Camera Feed -->
+        <div class="card" style="overflow:hidden">
+          <div class="card-header"><h2>Camera Feed</h2></div>
+          <div style="background:#0f172a;min-height:200px;display:flex;align-items:center;justify-content:center">
+            <video id="camFeed" autoplay playsinline muted class="webcam-feed" style="display:none"></video>
+            <div id="camOff" style="color:rgba(255,255,255,.3);text-align:center;padding:30px">
+              <i class="fas fa-video-slash" style="font-size:32px;display:block;margin-bottom:8px"></i>
+              <span style="font-size:13px">Camera Inactive</span>
+            </div>
+          </div>
+        </div>
 
-        // Toggle Audio & Websocket
-        micToggle.addEventListener('click', async () => {
-            if(!isStreaming) {
-                startMonitoring();
-            } else {
-                stopMonitoring();
-            }
-        });
+        <!-- Alert Log -->
+        <div class="card">
+          <div class="card-header"><h2><i class="fas fa-bell" style="color:var(--danger);margin-right:6px"></i>Alert Log</h2></div>
+          <div class="alert-log" id="alertLog">
+            <div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">No alerts yet</div>
+          </div>
+        </div>
+      </div>
 
-        function updateUIFromResult(data) {
-            idleState.style.opacity = '0';
-            setTimeout(() => idleState.style.display = 'none', 300);
-            resultState.style.opacity = '1';
+      <!-- RIGHT: Analysis Result -->
+      <div style="display:flex;flex-direction:column;gap:16px">
 
-            document.getElementById('updateTime').textContent = `Live \u2022 ${new Date().toLocaleTimeString()}`;
-            
-            const rawPred = data.prediction || "Unknown";
-            const conf = Math.round((data.confidence || 0) * 100);
-            
-            document.getElementById('predClass').textContent = rawPred.replace('_', ' ');
-            document.getElementById('confidenceText').textContent = `${conf}%`;
-            document.getElementById('confidenceRing').style.strokeDasharray = `${conf}, 100`;
+        <!-- Idle State -->
+        <div class="card" id="idleCard" style="flex:1;display:flex;align-items:center;justify-content:center;min-height:400px;text-align:center">
+          <div>
+            <div style="width:80px;height:80px;border-radius:50%;background:var(--light);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:28px;color:var(--border)"><i class="fas fa-wave-square"></i></div>
+            <h3 style="color:var(--dark);margin-bottom:8px">Awaiting Audio Stream</h3>
+            <p style="color:var(--muted);font-size:14px;max-width:300px;margin:0 auto">Start monitoring to begin real-time AI cry analysis via microphone and camera.</p>
+          </div>
+        </div>
 
-            // Risk Logic
-            const highRisk = ['pain', 'discomfort', 'asphyxia', 'abnormal'];
-            const lowRisk = ['hunger', 'sleepy', 'burping', 'normal'];
-            const lowerType = String(rawPred).toLowerCase();
-            
-            let risk = 'Medium';
-            for(let r of highRisk) { if(lowerType.includes(r)) risk = 'High'; }
-            for(let r of lowRisk) { if(lowerType.includes(r)) risk = 'Low'; }
+        <!-- Live Result -->
+        <div class="card card-pad" id="liveCard" style="display:none">
+          <div class="d-flex align-center" style="justify-content:space-between;margin-bottom:20px">
+            <div class="d-flex align-center gap-10">
+              <div class="ws-dot live"></div>
+              <span class="font-bold" style="color:var(--dark)">Live Analysis</span>
+            </div>
+            <span class="text-xs text-muted" id="lastUpdated">—</span>
+          </div>
 
-            const badge = document.getElementById('riskBadge');
-            const svgGroup = document.getElementById('confidenceSvg');
-            let ringColor = '#ef4444'; // default high
+          <!-- Waveform -->
+          <div style="background:var(--light);border-radius:12px;padding:16px;margin-bottom:20px;text-align:center">
+            <div class="waveform" style="justify-content:center"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+          </div>
 
-            if(risk === 'Low') {
-                badge.className = 'px-4 py-1.5 rounded-lg text-sm font-bold border bg-risk-low/10 text-risk-low border-risk-low/20';
-                badge.innerHTML = '<i class="fas fa-check-circle mr-1"></i> Normal / Low Risk';
-                ringColor = '#10B981';
-                document.getElementById('actionBox').innerHTML = `<h4 class="font-bold text-brand-teal text-sm mb-1"><i class="fas fa-info-circle mr-1"></i> Recommended Action</h4><p class="text-sm text-teal-800/80 font-medium">Standard care routine. Answer to primary biological needs.</p>`;
-                document.getElementById('actionBox').className = 'bg-teal-50 border border-teal-100 p-4 rounded-xl border-l-4 border-l-brand-teal';
-            } else if(risk === 'Medium') {
-                badge.className = 'px-4 py-1.5 rounded-lg text-sm font-bold border bg-risk-medium/10 text-risk-medium border-risk-medium/20';
-                badge.innerHTML = '<i class="fas fa-exclamation-triangle mr-1"></i> Medium Risk';
-                ringColor = '#F59E0B';
-                document.getElementById('actionBox').innerHTML = `<h4 class="font-bold text-orange-500 text-sm mb-1"><i class="fas fa-exclamation-circle mr-1"></i> Monitor Closely</h4><p class="text-sm text-orange-800/80 font-medium">Infant requires attention. Observe for developing symptoms.</p>`;
-                document.getElementById('actionBox').className = 'bg-orange-50 border border-orange-100 p-4 rounded-xl border-l-4 border-l-orange-500';
-            } else {
-                badge.className = 'px-4 py-1.5 rounded-lg text-sm font-bold border bg-risk-high/10 text-risk-high border-risk-high/20';
-                badge.innerHTML = '<i class="fas fa-times-circle mr-1"></i> High Risk Detected';
-                ringColor = '#EF4444';
-                document.getElementById('actionBox').innerHTML = `<h4 class="font-bold text-red-500 text-sm mb-1"><i class="fas fa-file-medical-alt mr-1"></i> Clinical Warning</h4><p class="text-sm text-red-800/80 font-medium">High stress acoustic signature detected. Assess vitals immediately.</p>`;
-                document.getElementById('actionBox').className = 'bg-red-50 border border-red-100 p-4 rounded-xl border-l-4 border-l-red-500';
-            }
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+            <!-- Cry Type -->
+            <div style="text-align:center">
+              <p class="text-xs text-muted font-bold" style="text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Detected Pattern</p>
+              <div class="result-big" id="liveCryType">—</div>
+              <div style="margin-top:8px" id="liveRisk"></div>
+            </div>
 
-            svgGroup.style.color = ringColor;
-        }
+            <!-- Confidence Ring (SVG) -->
+            <div style="text-align:center">
+              <p class="text-xs text-muted font-bold" style="text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Confidence</p>
+              <svg viewBox="0 0 36 36" style="max-width:120px;display:block;margin:0 auto" id="confSvg">
+                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#E2E8F0" stroke-width="3.8"/>
+                <path id="confRing" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#4A90E2" stroke-width="2.8" stroke-linecap="round" stroke-dasharray="0,100" style="transition:stroke-dasharray 1s ease"/>
+                <text x="18" y="20" font-family="Inter" font-weight="900" font-size="9" fill="#0f172a" text-anchor="middle" id="confText">0%</text>
+                <text x="18" y="25" font-family="Inter" font-size="2.8" fill="#64748b" text-anchor="middle">CONF.</text>
+              </svg>
+            </div>
+          </div>
 
-        async function startMonitoring() {
-            try {
-                mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                isStreaming = true;
-                micToggle.innerHTML = '<i class="fas fa-microphone-slash"></i> Stop Audio';
-                micToggle.classList.replace('bg-brand-blue', 'bg-red-500');
-                micToggle.classList.replace('hover:bg-blue-600', 'hover:bg-red-600');
-                micToggle.classList.remove('analyzing-pulse');
+          <!-- Recommendation Box -->
+          <div id="liveRecommend" style="background:var(--blue-l);border-left:4px solid var(--blue);border-radius:10px;padding:14px">
+            <p class="font-bold" style="color:var(--blue);font-size:13px;margin-bottom:4px"><i class="fas fa-lightbulb"></i> Recommended Action</p>
+            <p id="liveRecommendText" style="font-size:13px;color:var(--body)">—</p>
+          </div>
+        </div>
 
-                ws = new WebSocket('ws://localhost:8000/ws/monitor');
-                
-                ws.onopen = () => {
-                    wsIndicator.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Streaming';
-                    wsIndicator.classList.replace('bg-slate-100', 'bg-emerald-50');
-                    wsIndicator.classList.replace('text-slate-500', 'text-emerald-600');
-                    wsIndicator.classList.replace('border-slate-200', 'border-emerald-200');
+        <!-- History mini table -->
+        <div class="card">
+          <div class="card-header"><h2>Session History</h2><span class="text-xs text-muted" id="sessionCount">0 detections</span></div>
+          <div style="overflow-x:auto;max-height:220px;overflow-y:auto">
+            <table class="tbl">
+              <thead><tr><th>Time</th><th>Cry Type</th><th>Conf</th><th>Risk</th></tr></thead>
+              <tbody id="sessionHistory">
+                <tr><td colspan="4" style="text-align:center;padding:16px;color:var(--muted);font-size:13px">None yet</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-                    audioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
-                    const source = audioContext.createMediaStreamSource(mediaStream);
-                    const processor = audioContext.createScriptProcessor(4096, 1, 1);
-                    
-                    source.connect(processor);
-                    processor.connect(audioContext.destination);
+<script src="app.js"></script>
+<script>
+  requireAuth();
+  initSidebar('monitor');
 
-                    processor.onaudioprocess = (e) => {
-                        if (ws.readyState === WebSocket.OPEN) {
-                            const inputData = e.inputBuffer.getChannelData(0);
-                            const pcm16 = new Int16Array(inputData.length);
-                            for (let i = 0; i < inputData.length; i++) {
-                                let s = Math.max(-1, Math.min(1, inputData[i]));
-                                pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
-                            }
-                            
-                            const pid = patientSelect.value;
-                            if (pid) {
-                                ws.send(JSON.stringify({ type: 'metadata', patient_id: pid }));
-                            }
-                            ws.send(pcm16.buffer);
-                        }
-                    };
-                };
+  let running = false, mediaStream = null, audioCtx = null, ws = null;
+  let sessionDetections = [];
 
-                ws.onmessage = (event) => {
-                    const data = JSON.parse(event.data);
-                    if (data.prediction) {
-                        updateUIFromResult(data);
-                    }
-                };
+  // Load patients dropdown
+  (async () => {
+    try {
+      const pts = await apiJSON('/api/patients');
+      const sel = document.getElementById('patientSelect');
+      (pts||[]).forEach(p => {
+        const o = document.createElement('option'); o.value = p.id;
+        o.textContent = `${p.name} (${p.age_weeks || '—'}w)`;
+        sel.appendChild(o);
+      });
+    } catch (_) {}
+  })();
 
-                ws.onclose = () => stopMonitoring();
+  function setStatus(live) {
+    document.getElementById('statusDot').classList[live ? 'add' : 'remove']('live');
+    document.getElementById('statusTxt').textContent = live ? 'Live' : 'Disconnected';
+    document.getElementById('statusPill').style.cssText = live
+      ? 'padding:6px 14px;border-radius:50px;background:#d1fae5;border:1px solid #a7f3d0;font-size:12px;font-weight:700;color:var(--success);display:flex;align-items:center;gap:6px'
+      : 'padding:6px 14px;border-radius:50px;background:var(--light);border:1px solid var(--border);font-size:12px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:6px';
+  }
 
-            } catch (err) {
-                console.error("Audio block", err);
-                alert("Microphone access denied or error starting stream.");
-            }
-        }
+  async function startMonitoring() {
+    try {
+      mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+      document.getElementById('camFeed').srcObject = mediaStream;
+      document.getElementById('camFeed').style.display = 'block';
+      document.getElementById('camOff').style.display  = 'none';
+      document.getElementById('startBtn').style.display = 'none';
+      document.getElementById('stopBtn').style.display  = 'block';
+      document.getElementById('idleCard').style.display = 'none';
+      document.getElementById('liveCard').style.display = 'block';
+      running = true;
+      setStatus(true);
+      // Poll analysis every 4s
+      pollAnalysis();
+      showToast('Live monitoring started', 'success');
+    } catch (e) {
+      showToast('Microphone or camera access denied: ' + e.message, 'error');
+    }
+  }
 
-        function stopMonitoring() {
-            if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
-            if (audioContext) audioContext.close();
-            if (ws) ws.close();
-            
-            isStreaming = false;
-            micToggle.innerHTML = '<i class="fas fa-microphone-lines"></i> Start Diagnostic Audio';
-            micToggle.classList.replace('bg-red-500', 'bg-brand-blue');
-            micToggle.classList.replace('hover:bg-red-600', 'hover:bg-blue-600');
-            micToggle.classList.add('analyzing-pulse');
-            
-            wsIndicator.innerHTML = '<span class="w-2 h-2 rounded-full bg-slate-400"></span> Disconnected';
-            wsIndicator.className = 'hidden sm:flex items-center gap-2 bg-slate-100 text-slate-500 px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-200';
-            
-            // Reset to idle
-            idleState.style.display = 'flex';
-            setTimeout(() => idleState.style.opacity = '1', 50);
-            resultState.style.opacity = '0';
-        }
+  function stopMonitoring() {
+    running = false;
+    if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
+    document.getElementById('camFeed').srcObject = null;
+    document.getElementById('camFeed').style.display = 'none';
+    document.getElementById('camOff').style.display  = 'block';
+    document.getElementById('startBtn').style.display = 'block';
+    document.getElementById('stopBtn').style.display  = 'none';
+    document.getElementById('idleCard').style.display = 'flex';
+    document.getElementById('liveCard').style.display = 'none';
+    setStatus(false);
+    showToast('Monitoring stopped', 'info');
+  }
 
-        document.addEventListener('DOMContentLoaded', fetchPatients);
-    </script>
+  async function pollAnalysis() {
+    while (running) {
+      try {
+        const res  = await apiFetch('/api/analyze', { method: 'POST', body: new FormData() });
+        const data = await res.json();
+        if (data.cryType) updateLiveDisplay(data);
+      } catch (_) {}
+      await new Promise(r => setTimeout(r, 4000));
+    }
+  }
+
+  const riskColors = { Low: '#10B981', Medium: '#F59E0B', High: '#EF4444' };
+
+  function updateLiveDisplay(data) {
+    document.getElementById('liveCryType').textContent = data.cryType;
+    document.getElementById('liveRisk').innerHTML = riskBadge(data.riskLevel);
+    document.getElementById('confText').textContent = data.confidence + '%';
+    document.getElementById('confRing').style.strokeDasharray = `${data.confidence},100`;
+    document.getElementById('confRing').style.stroke = riskColors[data.riskLevel] || '#4A90E2';
+    document.getElementById('liveRecommendText').textContent = data.recommendation;
+    const box = document.getElementById('liveRecommend');
+    if (data.riskLevel === 'High')   box.style.cssText = 'background:#fee2e2;border-left:4px solid var(--danger);border-radius:10px;padding:14px';
+    else if (data.riskLevel === 'Medium') box.style.cssText = 'background:#fffbeb;border-left:4px solid var(--warning);border-radius:10px;padding:14px';
+    else box.style.cssText = 'background:var(--blue-l);border-left:4px solid var(--blue);border-radius:10px;padding:14px';
+    document.getElementById('lastUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString();
+
+    // Alert log for high/medium risk
+    if (data.riskLevel === 'High' || data.riskLevel === 'Medium') {
+      const log  = document.getElementById('alertLog');
+      const item = document.createElement('div');
+      item.className = 'alert-item' + (data.riskLevel === 'High' ? ' alert-high' : '');
+      item.innerHTML = `<i class="fas fa-triangle-exclamation" style="color:${riskColors[data.riskLevel]};margin-top:2px"></i><div><div class="font-bold">${data.cryType} — ${data.riskLevel} Risk</div><div class="text-xs text-muted">${new Date().toLocaleTimeString()}</div></div>`;
+      if (log.children.length === 1 && log.children[0].tagName !== 'DIV'.concat('')) log.innerHTML = '';
+      log.insertBefore(item, log.firstChild);
+      if (data.riskLevel === 'High') showToast('⚠️ High Risk: ' + data.cryType, 'error', 5000);
+    }
+
+    // Session history
+    sessionDetections.unshift({ time: new Date().toLocaleTimeString(), ...data });
+    document.getElementById('sessionCount').textContent = sessionDetections.length + ' detections';
+    document.getElementById('sessionHistory').innerHTML = sessionDetections.slice(0,10).map(d =>
+      `<tr><td class="text-xs">${d.time}</td><td class="font-bold">${d.cryType}</td><td>${d.confidence}%</td><td>${riskBadge(d.riskLevel)}</td></tr>`
+    ).join('');
+  }
+</script>
 </body>
 </html>

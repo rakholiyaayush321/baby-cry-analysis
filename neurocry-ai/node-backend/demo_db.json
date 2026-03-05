@@ -1,0 +1,89 @@
+{
+  "users": [
+    {
+      "_id": "63ktj37v",
+      "name": "Rakholiya Ayush",
+      "email": "rakholiyaayush894@gmail.com",
+      "password": "$2a$12$.vQHroPq4Yml1r0GHXJzheIirftfzl4UHyBsiIvhgDwFI0imAlnIG"
+    },
+    {
+      "_id": "8rgg6k9b",
+      "name": "rakholiyaayush",
+      "email": "rakholiyaayush089@gmail.com",
+      "password": "$2a$12$um9rdxMX4OyB/kaI1QJrHuI1lLh88RVH7FHUgcSQlfE0c483jFlcu"
+    }
+  ],
+  "patients": [
+    {
+      "_id": "zkd8o63u",
+      "userId": "8rgg6k9b",
+      "name": "trusha",
+      "gender": "Female",
+      "ageWeeks": 8,
+      "weight": 9,
+      "parentName": "savaliya kusam",
+      "contactNumber": "9825420436",
+      "medicalNotes": "",
+      "createdAt": "2026-03-04T18:16:05.735Z"
+    },
+    {
+      "_id": "bzeisgfj",
+      "userId": "8rgg6k9b",
+      "name": "prince",
+      "gender": "Male",
+      "ageWeeks": 8,
+      "weight": 9,
+      "parentName": "yuvi",
+      "contactNumber": "",
+      "medicalNotes": "",
+      "createdAt": "2026-03-04T18:16:53.169Z"
+    },
+    {
+      "_id": "ywoh2h1z",
+      "userId": "8rgg6k9b",
+      "name": "priya",
+      "gender": "Female",
+      "ageWeeks": 8,
+      "weight": 9,
+      "parentName": "krutik",
+      "contactNumber": "9909220436",
+      "medicalNotes": "",
+      "createdAt": "2026-03-04T18:17:34.301Z"
+    }
+  ],
+  "analyses": [
+    {
+      "_id": "ecel5ex5",
+      "patientId": "zkd8o63u",
+      "cryType": "Sleepy",
+      "confidence": 71,
+      "riskLevel": "Low",
+      "status": "Normal",
+      "recommendation": "Create a calm, dark environment. Begin sleep routine immediately.",
+      "mediaType": "audio",
+      "timestamp": "2026-03-04T18:16:05.735Z"
+    },
+    {
+      "_id": "9e7hdjb4",
+      "patientId": "bzeisgfj",
+      "cryType": "Pain Cry",
+      "confidence": 71,
+      "riskLevel": "High",
+      "status": "Critical",
+      "recommendation": "Check for physical discomfort. Assess temperature, diaper, and visible issues. Consult doctor if persistent.",
+      "mediaType": "audio",
+      "timestamp": "2026-03-04T18:16:53.169Z"
+    },
+    {
+      "_id": "9pl4yy9b",
+      "patientId": "ywoh2h1z",
+      "cryType": "Hungry",
+      "confidence": 80,
+      "riskLevel": "Low",
+      "status": "Normal",
+      "recommendation": "Feed the infant within the next few minutes. Monitor feeding amount carefully.",
+      "mediaType": "audio",
+      "timestamp": "2026-03-04T18:17:34.301Z"
+    }
+  ]
+}

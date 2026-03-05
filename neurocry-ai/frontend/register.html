@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Register | NeuroCry AI</title>
+<link rel="stylesheet" href="shared.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+.pw-strength { height: 4px; border-radius: 2px; background: var(--border); margin-top: 6px; overflow: hidden; }
+.pw-bar { height: 100%; border-radius: 2px; width: 0; transition: width .4s ease, background .3s; }
+.pw-label { font-size: 11px; color: var(--muted); margin-top: 4px; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="auth-page">
+
+  <!-- NAV -->
+  <nav class="pub-nav">
+    <div class="pub-nav-inner">
+      <a href="index.html" class="nav-logo">
+        <div class="nav-logo-icon"><i class="fas fa-stethoscope"></i></div>
+        <div class="nav-logo-text">NeuroCry <span>AI</span></div>
+      </a>
+      <div class="pub-nav-links" id="pubNavLinks"></div>
+      <div class="pub-nav-cta" id="pubNavCta"></div>
+    </div>
+  </nav>
+
+  <div class="auth-body">
+    <div class="auth-card">
+      <div class="auth-icon"><i class="fas fa-user-plus"></i></div>
+      <h1 class="auth-title">Create Account</h1>
+      <p class="auth-subtitle">Join NeuroCry AI to start monitoring infant cry patterns</p>
+
+      <div id="alertBox" class="alert alert-error"><i class="fas fa-exclamation-circle"></i><span id="alertMsg"></span></div>
+      <div id="successBox" class="alert alert-success"><i class="fas fa-check-circle"></i><span id="successMsg"></span></div>
+
+      <form id="registerForm" novalidate>
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <div class="input-wrap">
+            <i class="fas fa-user input-icon"></i>
+            <input type="text" id="name" class="form-input" placeholder="Dr. Jane Smith" autocomplete="name">
+          </div>
+          <div class="field-error" id="nameErr">Full name is required</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <div class="input-wrap">
+            <i class="fas fa-envelope input-icon"></i>
+            <input type="email" id="email" class="form-input" placeholder="jane@hospital.com" autocomplete="email">
+          </div>
+          <div class="field-error" id="emailErr">Please enter a valid email</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div class="input-wrap">
+            <i class="fas fa-lock input-icon"></i>
+            <input type="password" id="password" class="form-input" placeholder="At least 6 characters" autocomplete="new-password">
+          </div>
+          <div class="pw-strength"><div class="pw-bar" id="pwBar"></div></div>
+          <div class="pw-label" id="pwLabel">Enter a password</div>
+          <div class="field-error" id="passwordErr">Password must be at least 6 characters</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Confirm Password</label>
+          <div class="input-wrap">
+            <i class="fas fa-lock input-icon"></i>
+            <input type="password" id="confirm" class="form-input" placeholder="Re-enter password" autocomplete="new-password">
+          </div>
+          <div class="field-error" id="confirmErr">Passwords do not match</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg" id="submitBtn" style="margin-top:8px">
+          <i class="fas fa-user-plus"></i> Create Account
+        </button>
+      </form>
+
+      <div class="auth-footer">Already have an account? <a href="login.html">Sign in here</a></div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span class="footer-copy">© 2026 NeuroCry AI</span>
+    </div>
+  </footer>
+</div>
+
+<script src="app.js"></script>
+<script>
+  redirectIfLoggedIn();
+  initPublicNav();
+
+  // Password strength meter
+  document.getElementById('password').addEventListener('input', function() {
+    const pw  = this.value;
+    const bar = document.getElementById('pwBar');
+    const lbl = document.getElementById('pwLabel');
+    let score = 0;
+    if (pw.length >= 6)   score++;
+    if (pw.length >= 10)  score++;
+    if (/[A-Z]/.test(pw)) score++;
+    if (/[0-9]/.test(pw)) score++;
+    if (/[^a-zA-Z0-9]/.test(pw)) score++;
+    const configs = [
+      { pct: '0%',   bg: 'var(--border)',  txt: 'Enter a password' },
+      { pct: '25%',  bg: 'var(--danger)',  txt: 'Too weak' },
+      { pct: '50%',  bg: 'var(--warning)', txt: 'Moderate' },
+      { pct: '75%',  bg: 'var(--blue)',    txt: 'Strong' },
+      { pct: '90%',  bg: 'var(--success)', txt: 'Very strong' },
+      { pct: '100%', bg: 'var(--success)', txt: 'Excellent!' },
+    ];
+    const c = configs[Math.min(score, 5)];
+    bar.style.width   = c.pct;
+    bar.style.background = c.bg;
+    lbl.textContent   = c.txt;
+  });
+
+  function showErr(id, show) {
+    const el = document.getElementById(id);
+    el.classList[show ? 'add' : 'remove']('show');
+    const input = el.previousElementSibling?.querySelector?.('input') || document.getElementById(id.replace('Err',''));
+    if (input) input.classList[show ? 'add' : 'remove']('error');
+  }
+
+  document.getElementById('registerForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    document.getElementById('alertBox').classList.remove('show');
+
+    const name     = document.getElementById('name').value.trim();
+    const email    = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const confirm  = document.getElementById('confirm').value;
+
+    let valid = true;
+    showErr('nameErr',    !name);           if (!name)    valid = false;
+    showErr('emailErr',   !email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)); if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) valid = false;
+    showErr('passwordErr', password.length < 6);          if (password.length < 6) valid = false;
+    showErr('confirmErr',  password !== confirm);          if (password !== confirm) valid = false;
+    if (!valid) return;
+
+    const btn = document.getElementById('submitBtn');
+    setLoading(btn, true, 'Creating Account...');
+
+    try {
+      const res  = await fetch(API + '/api/auth/register', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ name, email, password })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        document.getElementById('alertMsg').textContent = data.error || 'Registration failed';
+        document.getElementById('alertBox').classList.add('show');
+        setLoading(btn, false);
+        return;
+      }
+      document.getElementById('successMsg').textContent = data.message || 'Registration successful!';
+      document.getElementById('successBox').classList.add('show');
+      document.getElementById('registerForm').style.display = 'none';
+      setTimeout(() => { window.location.href = 'login.html'; }, 2000);
+    } catch (err) {
+      document.getElementById('alertMsg').textContent = 'Cannot connect to server. Make sure the backend is running on port 3001.';
+      document.getElementById('alertBox').classList.add('show');
+      setLoading(btn, false);
+    }
+  });
+</script>
+</body>
+</html>

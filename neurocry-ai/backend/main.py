@@ -1,6 +1,8 @@
 from fastapi import FastAPI, UploadFile, File, Depends, HTTPException, status, Form, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
 from typing import List, Optional
@@ -19,6 +21,15 @@ app = FastAPI(title="NeuroCry AI Backend")
 # ── Schemas ────────────────────────────────────────────────────────────────────
 
 class UserCreate(BaseModel):
+    email: EmailStr
+    password: str
+
+class RegisterRequest(BaseModel):
+    name: str
+    email: EmailStr
+    password: str
+
+class LoginRequest(BaseModel):
     email: EmailStr
     password: str
 
@@ -91,6 +102,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Serve frontend static files
+_FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..", "frontend")
+if os.path.isdir(_FRONTEND_DIR):
+    app.mount("/static", StaticFiles(directory=_FRONTEND_DIR), name="static")
+
+@app.get("/app/{page_name}", include_in_schema=False)
+def serve_page(page_name: str):
+    """Serve frontend HTML pages by name, e.g. /app/index.html"""
+    page_path = os.path.join(_FRONTEND_DIR, page_name)
+    if os.path.isfile(page_path):
+        return FileResponse(page_path)
+    raise HTTPException(status_code=404, detail="Page not found")
+
+@app.get("/app", include_in_schema=False)
+@app.get("/app/", include_in_schema=False)
+def serve_index():
+    return FileResponse(os.path.join(_FRONTEND_DIR, "index.html"))
+
 # ── AI ENGINE ────────────────────────────────────────────────────────────────
 
 CRY_TYPES = [
@@ -117,6 +146,38 @@ def analyze_cry_logic(audio_path: Optional[str] = None, audio_bytes: Optional[by
 
 # ── AUTH ──────────────────────────────────────────────────────────────────────
 
+@app.post("/register")
+def register(data: RegisterRequest, db: Session = Depends(database.get_db)):
+    """Public endpoint: register a new user account."""
+    if not data.name.strip():
+        raise HTTPException(status_code=400, detail="Name is required")
+    if len(data.password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+    existing = db.query(models.User).filter(models.User.email == data.email).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    user = models.User(
+        name=data.name.strip(),
+        email=data.email,
+        hashed_password=auth.get_password_hash(data.password)
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return {"message": "Registration successful", "email": user.email}
+
+@app.post("/login")
+def login(data: LoginRequest, db: Session = Depends(database.get_db)):
+    """Public endpoint: authenticate and return a JWT access token."""
+    user = db.query(models.User).filter(models.User.email == data.email).first()
+    if not user or not auth.verify_password(data.password, user.hashed_password):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    token = auth.create_access_token(data={"sub": user.email})
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "user": {"name": user.name or user.email, "email": user.email}
+    }
 
 
 # ── PATIENTS ─────────────────────────────────────────────────────────────────

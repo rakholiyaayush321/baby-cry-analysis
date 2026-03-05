@@ -1,221 +1,165 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patient Portal | NeuroCry AI</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'], },
-                    colors: {
-                        brand: { blue: '#4A90E2', teal: '#2ED1C1', bg: '#F7F9FC' },
-                    },
-                    boxShadow: { 'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)', }
-                }
-            }
-        }
-    </script>
-    <style>
-        body { background-color: #F7F9FC; color: #334155; }
-        .sidebar-link { transition: all 0.2s ease-in-out; }
-        .sidebar-link:hover, .sidebar-link.active { background-color: #EFF6FF; color: #4A90E2; font-weight: 600; border-right: 4px solid #4A90E2; }
-        .sidebar-link.active i { color: #4A90E2; }
-        
-        .patient-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
-        .patient-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(74, 144, 226, 0.15); border-color: #4A90E2; }
-    </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Patient Portal | NeuroCry AI</title>
+<link rel="stylesheet" href="shared.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+.patient-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
+.patient-card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 20px; cursor: pointer; transition: transform .2s, box-shadow .2s, border-color .2s; }
+.patient-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(74,144,226,.12); border-color: var(--blue); }
+.p-avatar { width: 54px; height: 54px; border-radius: 50%; background: linear-gradient(135deg, var(--blue), var(--teal)); color: #fff; font-size: 20px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.p-meta  { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 14px 0; }
+.p-meta-item { background: var(--light); border-radius: 8px; padding: 8px 10px; }
+.p-meta-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.p-meta-value { font-size: 13px; font-weight: 700; color: var(--dark); margin-top: 2px; }
+.p-foot { display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid var(--border); }
+</style>
 </head>
-<body class="min-h-screen flex antialiased">
+<body class="app-layout">
 
-    <!-- SIDEBAR NAVIGATION -->
-    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col fixed h-full z-20 transition-transform duration-300 md:translate-x-0 -translate-x-full" id="sidebar">
-        <!-- Logo -->
-        <div class="h-20 flex items-center px-6 border-b border-slate-100">
-            <div class="w-8 h-8 bg-brand-blue rounded-lg flex items-center justify-center mr-3 shadow-lg shadow-blue-500/20">
-                <i class="fas fa-stethoscope text-white text-sm"></i>
-            </div>
-            <span class="text-xl font-bold tracking-tight text-slate-800">NeuroCry <span class="text-brand-blue">AI</span></span>
-        </div>
+<aside class="sidebar" id="appSidebar"></aside>
 
-        <!-- Nav Links -->
-        <nav class="flex-1 overflow-y-auto py-6 space-y-1">
-            <a href="dashboard.html" class="sidebar-link flex items-center px-6 py-3 text-slate-500">
-                <i class="fas fa-chart-pie w-5 mr-3 text-slate-400"></i> Dashboard
-            </a>
-            <a href="patients.html" class="sidebar-link active flex items-center px-6 py-3 text-slate-500">
-                <i class="fas fa-users w-5 mr-3 text-slate-400"></i> Patient List
-            </a>
-            <a href="add-patient.html" class="sidebar-link flex items-center px-6 py-3 text-slate-500">
-                <i class="fas fa-user-plus w-5 mr-3 text-slate-400"></i> Register Patient
-            </a>
-            <a href="monitor.html" class="sidebar-link flex items-center px-6 py-3 text-slate-500">
-                <i class="fas fa-wave-square w-5 mr-3 text-slate-400"></i> Cry Analysis
-            </a>
-        </nav>
+<div class="app-main">
+  <header class="app-topbar">
+    <div class="d-flex align-center gap-10">
+      <button id="sidebarToggle" style="background:none;border:none;font-size:20px;color:var(--muted)"><i class="fas fa-bars"></i></button>
+      <h1>Patient Portal</h1>
+    </div>
+    <div class="topbar-right">
+      <div class="input-wrap" style="width:220px">
+        <i class="fas fa-search input-icon"></i>
+        <input type="text" id="searchInput" class="form-input" placeholder="Search patients..." oninput="filterPatients()">
+      </div>
+      <a href="add-patient.html" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Register Patient</a>
+    </div>
+  </header>
 
-        <!-- Footer / User -->
-        <div class="p-6 border-t border-slate-100">
-            <button onclick="logout()" class="flex items-center text-slate-500 hover:text-red-500 transition-colors text-sm font-medium w-full">
-                <i class="fas fa-sign-out-alt mr-3"></i> Sign Out
-            </button>
-        </div>
-    </aside>
+  <div class="app-content">
 
-    <!-- MAIN CONTENT -->
-    <div class="flex-1 md:ml-64 flex flex-col min-h-screen">
-        
-        <!-- TOP HEADER -->
-        <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-10">
-            <div class="flex items-center gap-4">
-                <button class="md:hidden text-slate-500" onclick="document.getElementById('sidebar').classList.toggle('-translate-x-full')">
-                    <i class="fas fa-bars text-xl"></i>
-                </button>
-                <h1 class="text-2xl font-bold text-slate-800">Patient Directory</h1>
-            </div>
-            
-            <div class="flex items-center gap-4">
-                <div class="relative hidden sm:block">
-                    <i class="fas fa-search absolute left-3 top-2.5 text-slate-400"></i>
-                    <input type="text" placeholder="Search patients..." class="pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:bg-white focus:border-brand-blue outline-none transition-colors w-64">
-                </div>
-                <div class="w-10 h-10 bg-slate-100 rounded-full border border-slate-200 flex items-center justify-center text-slate-600">
-                    <i class="fas fa-user-md"></i>
-                </div>
-            </div>
-        </header>
-
-        <!-- DIRECTORY CONTENT -->
-        <main class="flex-1 p-8">
-            <div class="flex justify-between items-center mb-8">
-                <p class="text-slate-500">Select a patient card to view their complete biometric and cry analysis history.</p>
-                <a href="add-patient.html" class="hidden sm:flex items-center gap-2 bg-brand-blue hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-colors shadow-soft">
-                    <i class="fas fa-plus"></i> New Patient
-                </a>
-            </div>
-
-            <div id="loading" class="text-center py-20 text-slate-400">
-                <i class="fas fa-circle-notch fa-spin text-3xl mb-4 text-brand-blue"></i>
-                <p>Loading patient records...</p>
-            </div>
-
-            <div id="patientsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 hidden">
-                <!-- Data injected here -->
-            </div>
-            
-            <div id="emptyState" class="hidden text-center py-20 bg-white rounded-2xl border border-slate-100 shadow-soft">
-                <div class="w-20 h-20 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center text-4xl mx-auto mb-4">
-                    <i class="fas fa-folder-open"></i>
-                </div>
-                <h3 class="text-lg font-bold text-slate-800">No Patients Found</h3>
-                <p class="text-slate-500 mb-6">Your clinic roster is currently empty.</p>
-                <a href="add-patient.html" class="inline-flex items-center gap-2 bg-brand-blue hover:bg-blue-600 text-white px-6 py-2.5 rounded-lg font-semibold transition-colors">
-                    Register First Patient
-                </a>
-            </div>
-
-        </main>
+    <!-- Stats Row -->
+    <div class="stat-cards mb-24" id="portalStats">
+      <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-users"></i></div><div><div class="stat-label">Total Patients</div><div class="stat-value" id="totalPat">—</div></div></div>
+      <div class="stat-card"><div class="stat-icon teal"><i class="fas fa-file-waveform"></i></div><div><div class="stat-label">Total Analyses</div><div class="stat-value" id="totalAna">—</div></div></div>
+      <div class="stat-card"><div class="stat-icon red"><i class="fas fa-triangle-exclamation"></i></div><div><div class="stat-label">High Risk</div><div class="stat-value" id="totalRisk">—</div></div></div>
     </div>
 
-    <script src="auth.js"></script>
-    <script>
-        const API_URL = 'http://localhost:8000';
+    <!-- Loading -->
+    <div id="loadingState" style="text-align:center;padding:60px;color:var(--muted)">
+      <i class="fas fa-circle-notch fa-spin" style="font-size:32px;color:var(--blue);margin-bottom:12px;display:block"></i>
+      Loading patient records...
+    </div>
 
-        // Avatar background colors based on name length
-        const bgColors = ['bg-blue-100 text-blue-600', 'bg-teal-100 text-teal-600', 'bg-emerald-100 text-emerald-600', 'bg-purple-100 text-purple-600', 'bg-orange-100 text-orange-600'];
+    <!-- Grid -->
+    <div class="patient-grid" id="patientGrid" style="display:none"></div>
 
-        async function fetchPatients() {
-            try {
-                const res = await fetch(`${API_URL}/api/patients`, {
-                    headers: { 'Authorization': `Bearer ${getToken()}` }
-                });
+    <!-- Empty -->
+    <div id="emptyState" style="display:none;text-align:center;padding:72px 24px;background:var(--white);border-radius:18px;border:1px solid var(--border)">
+      <i class="fas fa-folder-open" style="font-size:48px;color:var(--border);margin-bottom:16px;display:block"></i>
+      <h3 style="color:var(--dark);margin-bottom:8px">No patients found</h3>
+      <p style="color:var(--muted);margin-bottom:20px;font-size:14px">Your patient directory is empty. Register your first patient to begin.</p>
+      <a href="add-patient.html" class="btn btn-primary"><i class="fas fa-plus"></i> Register First Patient</a>
+    </div>
 
-                document.getElementById('loading').classList.add('hidden');
-                
-                if (res.ok) {
-                    const patients = await res.json();
-                    
-                    if(patients.length === 0) {
-                        document.getElementById('emptyState').classList.remove('hidden');
-                    } else {
-                        const grid = document.getElementById('patientsGrid');
-                        grid.classList.remove('hidden');
+  </div>
+</div>
 
-                        patients.forEach(patient => {
-                            const initial = patient.name.charAt(0).toUpperCase();
-                            const colorClass = bgColors[patient.name.length % bgColors.length];
-                            
-                            // Get most recent analysis info if any
-                            let lastUpdateText = "No analyses yet";
-                            let statusIconClass = "text-slate-300";
-                            
-                            if (patient.analyses && patient.analyses.length > 0) {
-                                const latest = patient.analyses[patient.analyses.length - 1];
-                                const dateStr = new Date(latest.timestamp).toLocaleDateString([], {month: 'short', day: 'numeric'});
-                                lastUpdateText = `Analyzed ${dateStr}`;
-                                
-                                // Simple quick status dot based on prediction
-                                const lowerType = String(latest.prediction).toLowerCase();
-                                const highRisk = ['pain', 'discomfort', 'asphyxia', 'abnormal'];
-                                let isHigh = false;
-                                for(let r of highRisk) { if(lowerType.includes(r)) isHigh = true; }
-                                
-                                statusIconClass = isHigh ? "text-risk-high" : "text-risk-low";
-                            }
+<!-- Delete Modal -->
+<div id="deleteModal" class="overlay">
+  <div class="card card-pad" style="max-width:400px;width:90%;border-radius:20px">
+    <h3 style="color:var(--dark);mb:8px">Delete Patient?</h3>
+    <p style="color:var(--muted);font-size:14px;margin:12px 0">This will permanently delete the patient and all their analysis records. This action cannot be undone.</p>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
+      <button class="btn btn-ghost" onclick="closeDeleteModal()">Cancel</button>
+      <button class="btn btn-danger" id="confirmDeleteBtn" onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
 
-                            const card = document.createElement('div');
-                            card.className = "bg-white rounded-2xl border border-slate-200 p-6 patient-card relative";
-                            card.onclick = () => window.location.href = `profile.html?id=${patient.id}`;
-                            
-                            card.innerHTML = `
-                                <div class="absolute top-4 right-4 ${statusIconClass}">
-                                    <i class="fas fa-circle text-[10px]"></i>
-                                </div>
-                                
-                                <div class="flex items-center gap-4 mb-5">
-                                    <div class="w-14 h-14 rounded-full ${colorClass} flex items-center justify-center font-bold text-xl shadow-inner">
-                                        ${initial}
-                                    </div>
-                                    <div>
-                                        <h3 class="font-bold text-slate-800 text-lg truncate pr-4">${patient.name}</h3>
-                                        <p class="text-xs text-slate-500 font-medium">Guardian: ${patient.parent_name}</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="grid grid-cols-2 gap-4 mb-5">
-                                    <div class="bg-slate-50 rounded-xl p-3 text-center border border-slate-100">
-                                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Age</p>
-                                        <p class="font-semibold text-slate-700">${patient.age_weeks} <span class="text-xs font-normal">wks</span></p>
-                                    </div>
-                                    <div class="bg-slate-50 rounded-xl p-3 text-center border border-slate-100">
-                                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Weight</p>
-                                        <p class="font-semibold text-slate-700">${patient.weight_kg} <span class="text-xs font-normal">kg</span></p>
-                                    </div>
-                                </div>
-                                
-                                <div class="flex items-center justify-between pt-4 border-t border-slate-100">
-                                    <span class="text-xs text-slate-500 font-medium flex items-center gap-1.5 border border-slate-200 px-2 py-1 rounded-md">
-                                        <i class="fas fa-history text-[10px]"></i> ${lastUpdateText}
-                                    </span>
-                                    <i class="fas fa-chevron-right text-slate-300 text-sm"></i>
-                                </div>
-                            `;
-                            grid.appendChild(card);
-                        });
-                    }
-                }
-            } catch (err) {
-                console.error(err);
-                document.getElementById('loading').innerHTML = '<p class="text-red-500 font-bold">Failed to load directory data.</p>';
-            }
-        }
+<script src="app.js"></script>
+<script>
+  requireAuth();
+  initSidebar('patients');
 
-        document.addEventListener('DOMContentLoaded', fetchPatients);
-    </script>
+  let allPatients = [];
+  let deleteId = null;
+
+  async function loadPatients() {
+    try {
+      const patients = await apiJSON('/api/patients');
+      allPatients = patients || [];
+      document.getElementById('loadingState').style.display = 'none';
+
+      document.getElementById('totalPat').textContent  = allPatients.length;
+      document.getElementById('totalAna').textContent  = allPatients.reduce((s,p) => s + (p.analysis_count||0), 0);
+      document.getElementById('totalRisk').textContent = allPatients.filter(p => p.last_risk_level === 'High').length;
+
+      renderGrid(allPatients);
+    } catch (err) {
+      document.getElementById('loadingState').innerHTML = `<i class="fas fa-exclamation-triangle" style="font-size:32px;color:var(--danger);display:block;margin-bottom:10px"></i><p style="color:var(--danger)">${err.message}</p>`;
+    }
+  }
+
+  function renderGrid(patients) {
+    const grid = document.getElementById('patientGrid');
+    const empty = document.getElementById('emptyState');
+    if (!patients.length) {
+      grid.style.display = 'none'; empty.style.display = 'block'; return;
+    }
+    empty.style.display = 'none'; grid.style.display = 'grid';
+
+    const colors = ['#4A90E2','#2ED1C1','#10B981','#8B5CF6','#F59E0B','#EF4444','#F97316'];
+    grid.innerHTML = patients.map((p, i) => {
+      const color = colors[i % colors.length];
+      return `
+      <div class="patient-card" onclick="location.href='profile.html?id=${p.id}'">
+        <div class="d-flex align-center gap-10" style="margin-bottom:4px">
+          <div class="p-avatar" style="background:${color}">${(p.name||'?')[0].toUpperCase()}</div>
+          <div style="flex:1;overflow:hidden">
+            <div class="font-bold truncate" style="color:var(--dark);font-size:15px">${p.name}</div>
+            <div class="text-xs text-muted">Guardian: ${p.parent_name || '—'}</div>
+          </div>
+          <div style="font-size:8px;width:8px;height:8px;border-radius:50%;background:${p.last_risk_level==='High'?'var(--danger)':p.last_risk_level==='Medium'?'var(--warning)':'var(--success)'}"></div>
+        </div>
+        <div class="p-meta">
+          <div class="p-meta-item"><div class="p-meta-label">Age</div><div class="p-meta-value">${p.age_weeks || '—'} wks</div></div>
+          <div class="p-meta-item"><div class="p-meta-label">Weight</div><div class="p-meta-value">${p.weight || '—'} kg</div></div>
+          <div class="p-meta-item"><div class="p-meta-label">Analyses</div><div class="p-meta-value">${p.analysis_count || 0}</div></div>
+          <div class="p-meta-item"><div class="p-meta-label">Risk</div><div class="p-meta-value">${p.last_risk_level || 'Low'}</div></div>
+        </div>
+        <div class="p-foot">
+          <div class="text-xs text-muted"><i class="fas fa-clock"></i> ${timeAgo(p.last_analysis)}</div>
+          <div style="display:flex;gap:6px" onclick="event.stopPropagation()">
+            <a href="profile.html?id=${p.id}" class="btn btn-ghost btn-sm"><i class="fas fa-eye"></i></a>
+            <button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="openDeleteModal('${p.id}')"><i class="fas fa-trash"></i></button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function filterPatients() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    renderGrid(allPatients.filter(p =>
+      p.name.toLowerCase().includes(q) || (p.parent_name||'').toLowerCase().includes(q)
+    ));
+  }
+
+  function openDeleteModal(id) { deleteId = id; document.getElementById('deleteModal').classList.add('show'); }
+  function closeDeleteModal()  { deleteId = null; document.getElementById('deleteModal').classList.remove('show'); }
+
+  async function confirmDelete() {
+    if (!deleteId) return;
+    try {
+      await apiJSON('/api/patients/' + deleteId, { method: 'DELETE' });
+      showToast('Patient deleted', 'info');
+      closeDeleteModal();
+      loadPatients();
+    } catch (err) { showToast(err.message, 'error'); }
+  }
+
+  loadPatients();
+</script>
 </body>
 </html>
